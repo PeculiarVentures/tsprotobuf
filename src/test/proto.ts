@@ -7,6 +7,27 @@ context("proto", () => {
 
     context("simple types", () => {
 
+        it("string", (done) => {
+            async function Test() {
+
+                @ProtobufElement({ name: "test" })
+                class TestProto extends ObjectProto {
+                    @ProtobufProperty({ name: "data", type: "string", id: 1 })
+                    public data: string;
+                }
+
+                const test1 = new TestProto();
+                test1.data = "hello";
+
+                const raw = await test1.exportProto();
+
+                const test2 = await TestProto.importProto(raw);
+                assert.equal(test1.data, test2.data);
+            }
+
+            Test().then(done, done);
+        });
+
         it("bytes", (done) => {
             async function Test() {
 
