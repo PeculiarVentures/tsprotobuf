@@ -1,0 +1,8 @@
+.vscode
+.nyc_output
+coverage
+node_modules
+src
+out
+rollup.*.js
+ts*.json

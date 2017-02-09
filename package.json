@@ -1,0 +1,48 @@
+{
+  "name": "tsprotobuf",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/tsprotobuf.js",
+  "types": "index.d.ts",
+  "module": "dist/tsprotobuf.es.js",
+  "scripts": {
+    "test": "mocha out/test/**/*.js",
+    "build": "npm run build:dist",
+    "build:es5": "rollup -c",
+    "build:map": "tsc --sourceMap",
+    "build:es2015": "rollup -c rollup.config.es.js",
+    "build:dist": "npm run build:es5 && npm run build:es2015",
+    "prepublish": "npm run build",
+    "pub": "npm version patch && npm publish && git push",
+    "precoverage": "npm run build:map",
+    "coverage": "nyc npm test",
+    "precoveragehtml": "npm run coverage",
+    "coveragehtml": "nyc report -r html",
+    "coveralls": "nyc report --reporter=text-lcov | coveralls"
+  },
+  "keywords": [
+    "protobuf",
+    "scheme",
+    "decorators"
+  ],
+  "author": "PeculiarVentures",
+  "contributors": [
+    "Miroshin Stepan<microshine@mail.ru>"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "protobufjs": "^6.6.3",
+    "pvtsutils": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/chai": "^3.4.34",
+    "@types/mocha": "^2.2.39",
+    "chai": "^3.5.0",
+    "coveralls": "^2",
+    "mocha": "^3.2.0",
+    "nyc": "^10",
+    "rollup": "^0.41.4",
+    "rollup-plugin-typescript": "^0.8.1",
+    "typescript": "^2.1.5"
+  }
+}
