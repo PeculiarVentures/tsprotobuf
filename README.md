@@ -19,7 +19,7 @@ JavaScript:
 const tsprotobuf = require("tsprotobuf");
 ```
 
-TypeScript
+TypeScript:
 ```javascript
 import {ObjectProto, ProtobufElement, ProtobufProperty} from "tsprotobuf";
 ```
@@ -35,7 +35,7 @@ message SearchRequest {
 }
 ```
 
-![Screenshot](./resources/screen.jpg)
+![Screenshot](https://github.com/PeculiarVentures/tsprotobuf/blob/master/resources/screen.jpg?raw=true)
 
 ## Types
 

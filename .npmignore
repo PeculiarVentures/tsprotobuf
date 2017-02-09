@@ -4,5 +4,7 @@ coverage
 node_modules
 src
 out
+resources
 rollup.*.js
 ts*.json
+*.yml
