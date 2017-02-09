@@ -1,4 +1,5 @@
 # tsprotobuf
+`tsprotobuf` is a helper library that contains functions that make working with ProtoBuf easier in Typescript.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Coverage Status](https://coveralls.io/repos/github/PeculiarVentures/tsprotobuf/badge.svg?branch=master)](https://coveralls.io/github/PeculiarVentures/tsprotobuf?branch=master)
