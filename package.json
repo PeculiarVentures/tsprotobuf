@@ -30,6 +30,14 @@
     "Miroshin Stepan<microshine@mail.ru>"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PeculiarVentures/tsprotobuf"
+  },
+    "bugs": {
+    "url": "https://github.com/PeculiarVentures/tsprotobuf/issues"
+  },
+  "homepage": "https://github.com/PeculiarVentures/tsprotobuf#readme",
   "dependencies": {
     "protobufjs": "^6.6.3",
     "pvtsutils": "^1.0.1"
