@@ -1,4 +1,5 @@
 # tsprotobuf
+
 `tsprotobuf` is a helper library that contains functions that make working with ProtoBuf easier in Typescript.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
@@ -13,8 +14,14 @@ npm install tsprotobuf
 
 ## Using
 
+JavaScript:
 ```javascript
-const utils = require("tsprotobuf");
+const tsprotobuf = require("tsprotobuf");
+```
+
+TypeScript
+```javascript
+import {ObjectProto, ProtobufElement, ProtobufProperty} from "tsprotobuf";
 ```
 
 The `tsprotobuf` namespace will always be available globally and also supports AMD loaders.
@@ -145,7 +152,7 @@ TypeScript
 @ProtobufElement("Result")
 class ResultProto extends ObjectProto {
 
-    @ProtobufProperty({ name: "url", id: 1, type: "string" })
+    @ProtobufProperty({ name: "url", id: 1, type: "string", required: true })
     public url: string;
 
     @ProtobufProperty({ name: "title", id: 2, type: "string" })
