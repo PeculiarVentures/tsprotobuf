@@ -38,7 +38,6 @@ function defineProperty(target: any, key: string, params: any) {
                 let defaultValue = params.defaultValue;
                 if (params.parser) {
                     defaultValue = new params.parser();
-                    defaultValue.name = params.name;
                 }
                 this[propertyKey] = defaultValue;
             }
