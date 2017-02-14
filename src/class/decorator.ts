@@ -76,7 +76,7 @@ export function ProtobufProperty<T>(params: IProtobufSchemeItem<T>) {
                 converter: params.converter,
             };
         }
-        params.name = params.name || (params.parser && (params.parser as any).name) || key;
+        params.name = params.name || key;
 
         t.items[key].name = params.name;
         t.items[key].required = params.required || false;
