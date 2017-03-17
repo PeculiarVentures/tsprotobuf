@@ -1,5 +1,5 @@
 import { Field, Type } from "protobufjs";
-import {assign} from "pvtsutils";
+import { assign } from "pvtsutils";
 import { IProtobufElement, IProtobufScheme, IProtobufSchemeItem } from "./type";
 
 export function ProtobufElement(params: IProtobufElement) {
@@ -11,11 +11,17 @@ export function ProtobufElement(params: IProtobufElement) {
         t.target = target;
         t.items = assign({}, t.items);
 
-        // create protobuf scheme 
+        // create protobuf scheme
         const scheme = new Type(t.localName);
         for (const key in t.items) {
             const item = t.items[key];
-            scheme.add(new Field(item.name, item.id, item.type, item.required ? void 0 : "optional"));
+            let rule: string | undefined = void 0;
+            if (item.repeated) {
+                rule = "repeated";
+            } else if (item.required) {
+                rule = "required";
+            }
+            scheme.add(new Field(item.name, item.id, item.type, rule));
         }
         t.protobuf = scheme;
     };
@@ -36,13 +42,14 @@ function defineProperty(target: any, key: string, params: any) {
         get: function () {
             if (this[propertyKey] === void 0) {
                 let defaultValue = params.defaultValue;
-                if (params.parser) {
+                if (params.parser && !params.repeated) {
                     defaultValue = new params.parser();
                 }
                 this[propertyKey] = defaultValue;
             }
             return this[propertyKey];
         },
+        enumerable: true,
     };
 
     // private property
@@ -62,26 +69,20 @@ export function ProtobufProperty<T>(params: IProtobufSchemeItem<T>) {
             t.target = t;
         }
 
-        if (params.parser) {
-            t.items[key] = {
-                id: params.id,
-                parser: params.parser,
-                type: "bytes",
-            };
-        } else {
-            t.items[key] = {
-                id: params.id,
-                type: params.type || "bytes",
-                defaultValue: params.defaultValue,
-                converter: params.converter,
-            };
-        }
+        t.items[key] = {
+            id: params.id,
+            type: params.type || "bytes",
+            defaultValue: params.defaultValue,
+            converter: params.converter || null,
+            parser: params.parser || null,
+        };
         params.name = params.name || key;
 
         t.items[key].name = params.name;
         t.items[key].required = params.required || false;
+        t.items[key].repeated = params.repeated || false;
 
-        defineProperty(target, key, params);
+        defineProperty(target, key, t.items[key]);
     };
 
 }

@@ -71,6 +71,7 @@ Decorator for class properties
 | name         | string     | Name of property in Protobuf schema                                                          |
 | id           | number     | Index of property in Protobuf message                                                        |
 | required     | boolean    | Determines if property is required                                                           |
+| repeated     | boolean    | Determines if property is repeated                                                           |
 | type         | string     | Protobuf simple type. `bytes`, `uint32`, `bool`, etc. Default value is `bytes`               |
 | converter    | IConverter | Converter for difficult data                                                                 |
 | defaultValue | any        | Default value for property                                                                   |
@@ -189,6 +190,79 @@ class RequestMessageProto extends BaseProto {
     public text: string;
 
 }
+```
+
+#### Example 5
+
+Repeating
+
+Protobuf scheme:
+```
+message CryptoKey {
+  required string algorithm = 1;
+  required string type = 2;
+  required bool extractable = 3;
+  repeated string usages = 4;
+}
+
+message CryptoKeys {
+    repeated CryptoKey keys = 1;
+}
+```
+
+TypeScript
+```typescript
+@ProtobufElement("CryptoKey")
+class CryptoKeyProto extends ObjectProto {
+
+    static INDEX = 0;
+
+    @ProtobufProperty({ id: CryptoKeyProto.INDEX++, type: "string", required: true })
+    public algorithm: string;
+    
+    @ProtobufProperty({ id: CryptoKeyProto.INDEX++, type: "string", required: true })
+    public type: string;
+
+    @ProtobufProperty({ id: CryptoKeyProto.INDEX++, type: "bool", required: true })
+    public extractable: boolean;
+    
+    @ProtobufProperty({ id: CryptoKeyProto.INDEX++, type: "string", repeated: true })
+    public usages: string[];
+
+}
+
+@ProtobufElement("CryptKeys")
+class CryptoKeysProto extends ObjectProto {
+
+    static INDEX = 0;
+
+    @ProtobufProperty({ id: CryptoKeysProto.INDEX++, repeated: true, parser: CryptoKeyProto })
+    public items: CryptoKeyProto[];
+
+}
+
+// Using
+
+const keys = new CryptoKeysProto();
+
+const key1 = new CryptoKey();
+key1.algorithm = "RSA";
+key1.type = "public;
+key1.extractable = false;
+key1.usages = ["verify"];
+
+const key2 = new CryptoKey();
+key2.algorithm = "ECDH";
+key2.type = "private;
+key2.extractable = false;
+key2.usages = ["deriveKey", "deriveBits"];
+
+keys.items = [key1, key2];
+
+keys.exportProto()
+    .then((raw) => {
+        console.log(raw);
+    })
 ```
 
 ## Related

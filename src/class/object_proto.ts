@@ -42,27 +42,44 @@ export class ObjectProto implements IProtobufSerializable {
         for (const key in thisStatic.items) {
             const item = thisStatic.items[key];
 
-            const schemeValue = scheme[item.name];
-            if (ArrayBuffer.isView(schemeValue)) {
-                scheme[item.name] = new Uint8Array(schemeValue as Uint8Array);
+            let schemeValues = scheme[item.name];
+            if (ArrayBuffer.isView(schemeValues)) {
+                // Convert Buffer to Uint8Array
+                schemeValues = new Uint8Array(schemeValues as Uint8Array);
             }
             // console.log(`Import:${thisStatic.localName}:${item.name}`);
-            if (item.parser) {
-                const parser = item.parser;
-                if (scheme[item.name] && scheme[item.name].byteLength) {
-                    that[key] = await parser.importProto(new Uint8Array(scheme[item.name]).buffer);
-                } else if (item.required) {
-                    throw new Error(`Error: Parameter '${item.name}' is required in '${thisStatic.localName}' protobuf message.`);
-                }
-            } else {
-                if (item.converter) {
-                    if (scheme[item.name] && scheme[item.name].byteLength) {
-                        that[key] = await item.converter.get(scheme[item.name]);
+
+            let setValue: any;
+            if (!Array.isArray(schemeValues)) {
+                // Convert single element to array
+                schemeValues = [schemeValues];
+            }
+            for (const schemeValue of schemeValues) {
+                if (item.parser) {
+                    const parser = item.parser;
+                    if (schemeValue && schemeValue.byteLength) {
+                        setValue = await parser.importProto(new Uint8Array(schemeValue).buffer);
                     } else if (item.required) {
                         throw new Error(`Error: Parameter '${item.name}' is required in '${thisStatic.localName}' protobuf message.`);
                     }
                 } else {
-                    that[key] = scheme[item.name];
+                    if (item.converter) {
+                        if (schemeValue && schemeValue.byteLength) {
+                            setValue = await item.converter.get(schemeValue);
+                        } else if (item.required) {
+                            throw new Error(`Error: Parameter '${item.name}' is required in '${thisStatic.localName}' protobuf message.`);
+                        }
+                    } else {
+                        setValue = schemeValue;
+                    }
+                }
+                if (item.repeated) {
+                    if (!that[key]) {
+                        that[key] = [];
+                    }
+                    that[key].push(setValue);
+                } else {
+                    that[key] = setValue;
                 }
             }
         }
@@ -81,29 +98,44 @@ export class ObjectProto implements IProtobufSerializable {
             const item = thisStatic.items[key];
 
             // console.log(`Export:${thisStatic.localName}:${item.name}`);
-            if (item.parser) {
-                const obj = that[key] as ObjectProto;
-                const raw = await obj.exportProto();
-                if (item.required && !raw) {
-                    throw new Error(`Error: Paramter '${key}' is required in '${thisStatic.localName}' protobuf message.`);
-                }
-                if (raw) {
-                    protobuf[item.name] = new Uint8Array(raw);
-                }
-            } else {
-                if (item.required && that[key] === void 0) {
-                    throw new Error(`Error: Paramter '${key}' is required in '${thisStatic.localName}' protobuf message.`);
-                }
-                if (item.converter) {
-                    if (that[key]) {
-                        protobuf[item.name] = await item.converter.set(that[key]);
+            let values = that[key];
+            if (!Array.isArray(values)) {
+                values = values === void 0 ? [] : [values];
+            }
+
+            for (let value of values) {
+                let protobufValue: any;
+                if (item.parser) {
+                    const obj = value as ObjectProto;
+                    const raw = await obj.exportProto();
+                    if (item.required && !raw) {
+                        throw new Error(`Error: Paramter '${key}' is required in '${thisStatic.localName}' protobuf message.`);
+                    }
+                    if (raw) {
+                        protobufValue = new Uint8Array(raw);
                     }
                 } else {
-                    let value = that[key];
-                    if (value instanceof ArrayBuffer) {
-                        value = new Uint8Array(value);
+                    if (item.required && value === void 0) {
+                        throw new Error(`Error: Paramter '${key}' is required in '${thisStatic.localName}' protobuf message.`);
                     }
-                    protobuf[item.name] = value;
+                    if (item.converter) {
+                        if (value) {
+                            protobufValue = await item.converter.set(value);
+                        }
+                    } else {
+                        if (value instanceof ArrayBuffer) {
+                            value = new Uint8Array(value);
+                        }
+                        protobufValue = value;
+                    }
+                }
+                if (item.repeated) {
+                    if (!protobuf[item.name]) {
+                        protobuf[item.name] = [];
+                    }
+                    protobuf[item.name].push(protobufValue);
+                } else {
+                    protobuf[item.name] = protobufValue;
                 }
             }
         }
