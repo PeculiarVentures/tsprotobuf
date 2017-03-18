@@ -18,6 +18,7 @@ declare namespace tsprotobuf {
         name?: string;
         id: number;
         required?: boolean;
+        repeated?: boolean; 
         type?: string;
         converter?: IConverter<T>;
         defaultValue?: T;
