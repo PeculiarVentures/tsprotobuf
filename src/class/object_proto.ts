@@ -23,8 +23,14 @@ export class ObjectProto implements IProtobufSerializable {
         const that = this as any;
         for (const key in thisStatic.items) {
             const item = thisStatic.items[key];
-            if (item.parser && that[key] && that[key].hasChanged()) {
-                return true;
+            if (item.repeated) {
+                if (item.parser) {
+                    return that[key].some((arrayItem: any) => arrayItem.hasChanged());
+                }
+            } else {
+                if (item.parser && that[key] && that[key].hasChanged()) {
+                    return true;
+                }
             }
         }
         return false;

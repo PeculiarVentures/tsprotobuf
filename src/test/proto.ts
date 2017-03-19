@@ -478,6 +478,41 @@ context("proto", () => {
             })().then(done, done);
         });
 
+        it("simple type 2", (done) => {
+            (async () => {
+
+                @ProtobufElement({ name: "Test" })
+                class Test extends ObjectProto {
+
+                    public static INDEX = 0;
+
+                    @ProtobufProperty({ type: "string", id: Test.INDEX++, required: true })
+                    public id: string;
+
+                    @ProtobufProperty({ type: "string", id: Test.INDEX++, required: true })
+                    public name: string;
+
+                    @ProtobufProperty({ type: "string", id: Test.INDEX++, repeated: true })
+                    public algorithms: string[];
+                }
+
+                const test = new Test();
+                test.id = "";
+                test.name = "";
+                test.algorithms = ["1", "2", "3", "4", "5"];
+
+                assert.equal(test.algorithms.length, 5);
+
+                const raw = await test.exportProto();
+
+                const test2 = await Test.importProto(raw);
+
+                assert.equal(test2.algorithms.length, test.algorithms.length);
+                assert.equal(test2.algorithms.join(","), "1,2,3,4,5");
+
+            })().then(done, done);
+        });
+
         it("converter type", (done) => {
             (async () => {
 
