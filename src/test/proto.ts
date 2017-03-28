@@ -506,6 +506,7 @@ context("proto", () => {
                 const raw = await test.exportProto();
 
                 const test2 = await Test.importProto(raw);
+                assert.equal(test2.algorithms.length, 5);
 
                 assert.equal(test2.algorithms.length, test.algorithms.length);
                 assert.equal(test2.algorithms.join(","), "1,2,3,4,5");
@@ -539,6 +540,7 @@ context("proto", () => {
                 const raw = await test.exportProto();
 
                 const test2 = await Test.importProto(raw);
+                assert.equal(test2.names.length, 5);
 
                 assert.equal(test2.names.length, test.names.length);
                 assert.equal(test2.names.join(","), "1,2,3,4,5");
@@ -556,7 +558,6 @@ context("proto", () => {
 
                     @ProtobufProperty({ id: Child.INDEX++, type: "uint32" })
                     public id: number;
-
 
                     @ProtobufProperty({ id: Child.INDEX++, type: "string" })
                     public name: string;
@@ -594,12 +595,61 @@ context("proto", () => {
                 const raw = await test.exportProto();
 
                 const test2 = await Test.importProto(raw);
+                assert.equal(test2.children.length, 3);
 
                 assert.equal(test2.children.length, test.children.length);
                 test.children.forEach((item, index) => {
                     assert.equal(test.children[index].id, test2.children[index].id);
                     assert.equal(test.children[index].name, test2.children[index].name);
                 });
+
+            })().then(done, done);
+        });
+
+        it("empty array", (done) => {
+            (async () => {
+
+                @ProtobufElement({ name: "Child" })
+                class Child extends ObjectProto {
+
+                    public static INDEX = 0;
+
+                    @ProtobufProperty({ id: Child.INDEX++, type: "uint32" })
+                    public id: number;
+
+                    @ProtobufProperty({ id: Child.INDEX++, type: "string" })
+                    public name: string;
+
+                    public constructor();
+                    public constructor(id: number, name: string);
+                    public constructor(id?: number, name?: string) {
+                        super();
+                        if (id && name) {
+                            this.name = name;
+                            this.id = id;
+                        }
+                    }
+
+                }
+
+                @ProtobufElement({ name: "Test" })
+                class Test extends ObjectProto {
+
+                    public static INDEX = 0;
+
+                    @ProtobufProperty({ type: "bytes", id: Test.INDEX++, repeated: true, parser: Child })
+                    public children: Child[];
+                }
+
+                const test = new Test();
+                test.children = [];
+
+                assert.equal(test.children.length, 0);
+
+                const raw = await test.exportProto();
+
+                const test2 = await Test.importProto(raw);
+                assert.equal(test2.children.length, 0);
 
             })().then(done, done);
         });

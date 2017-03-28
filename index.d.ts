@@ -50,11 +50,11 @@ declare namespace tsprotobuf {
     export class ObjectProto implements IProtobufSerializable {
         static importProto<T extends ObjectProto>(this: {
             new (): T;
-        }, raw: ArrayBuffer): Promise<T>;
+        }, data: ArrayBuffer | ObjectProto): Promise<T>;
         protected raw?: ArrayBuffer | null;
         isEmpty(): boolean;
         hasChanged(): boolean;
-        importProto(raw: ArrayBuffer): Promise<void>;
+        importProto(data: ArrayBuffer | ObjectProto): Promise<void>;
         exportProto(): Promise<ArrayBuffer>;
     }
 

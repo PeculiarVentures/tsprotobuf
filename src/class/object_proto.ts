@@ -2,9 +2,9 @@ import { IProtobufScheme, IProtobufSerializable } from "./type";
 
 export class ObjectProto implements IProtobufSerializable {
 
-    public static async importProto<T extends ObjectProto>(this: { new (): T }, raw: ArrayBuffer) {
+    public static async importProto<T extends ObjectProto>(this: { new (): T }, data: ArrayBuffer | ObjectProto) {
         const res = new this();
-        await res.importProto(raw);
+        await res.importProto(data);
         return res;
     }
 
@@ -36,10 +36,16 @@ export class ObjectProto implements IProtobufSerializable {
         return false;
     }
 
-    public async importProto(raw: ArrayBuffer) {
+    public async importProto(data: ArrayBuffer | ObjectProto) {
         const thisStatic = this.constructor as IProtobufScheme;
         const that = this as any;
         let scheme: { [key: string]: any };
+        let raw: ArrayBuffer;
+        if (data instanceof ObjectProto) {
+            raw = await data.exportProto();
+        } else {
+            raw = data;
+        }
         try {
             scheme = thisStatic.protobuf.decode(new Uint8Array(raw)).toObject();
         } catch (e) {
@@ -57,8 +63,13 @@ export class ObjectProto implements IProtobufSerializable {
 
             let setValue: any;
             if (!Array.isArray(schemeValues)) {
-                // Convert single element to array
-                schemeValues = [schemeValues];
+                if (item.repeated) {
+                    // INFO: empty protobuf array returns undefined
+                    that[key] = schemeValues = [];
+                } else {
+                    // Convert single element to array
+                    schemeValues = [schemeValues];
+                }
             }
             for (const schemeValue of schemeValues) {
                 if (item.parser) {
