@@ -39,6 +39,7 @@
   },
   "homepage": "https://github.com/PeculiarVentures/tsprotobuf#readme",
   "dependencies": {
+    "@types/long": "^3.0.31",
     "protobufjs": "^6.6.3",
     "pvtsutils": "^1.0.1"
   },
