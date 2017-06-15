@@ -12,7 +12,7 @@
     "build:map": "tsc --sourceMap",
     "build:es2015": "rollup -c rollup.config.es.js",
     "build:dist": "npm run build:es5 && npm run build:es2015",
-    "prepublish": "npm run build",
+    "prepub": "npm run build",
     "pub": "npm version patch && npm publish && git push",
     "precoverage": "npm run build:map",
     "coverage": "nyc npm test",
