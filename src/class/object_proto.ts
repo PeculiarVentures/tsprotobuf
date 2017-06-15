@@ -49,7 +49,7 @@ export class ObjectProto implements IProtobufSerializable {
         try {
             scheme = thisStatic.protobuf.decode(new Uint8Array(raw)).toObject();
         } catch (e) {
-            throw new Error(`Error: Cannot decode message for ${thisStatic.localName}.\n$ProtobufError: {e.message}`);
+            throw new Error(`Error: Cannot decode message for ${thisStatic.localName}.\n$ProtobufError: ${e.message}`);
         }
         for (const key in thisStatic.items) {
             const item = thisStatic.items[key];
