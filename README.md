@@ -247,13 +247,13 @@ const keys = new CryptoKeysProto();
 
 const key1 = new CryptoKeysProto();
 key1.algorithm = "RSA";
-key1.type = "public;
+key1.type = "public";
 key1.extractable = false;
 key1.usages = ["verify"];
 
 const key2 = new CryptoKeysProto();
 key2.algorithm = "ECDH";
-key2.type = "private;
+key2.type = "private";
 key2.extractable = false;
 key2.usages = ["deriveKey", "deriveBits"];
 
