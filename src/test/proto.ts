@@ -143,7 +143,7 @@ context("proto", () => {
 
         context("optional", () => {
 
-            it("optional with default value", (done) => {
+            it("with default value", (done) => {
                 async function Test() {
 
                     @ProtobufElement({ name: "test" })
@@ -547,6 +547,34 @@ context("proto", () => {
 
             })().then(done, done);
         });
+
+        it("converter ArrayBuffer", (done) => {
+        @ProtobufElement({ name: "Test" })
+        class Test extends ObjectProto {
+
+            public static INDEX = 0;
+
+            @ProtobufProperty({ id: Test.INDEX++, repeated: true, converter: ArrayBufferConverter })
+            public items: ArrayBuffer[] = [];
+
+        }
+
+        (async () => {
+            const test = new Test();
+            test.items.push(new Uint8Array([1]).buffer);
+            test.items.push(new Uint8Array([2, 2]).buffer);
+            test.items.push(new Uint8Array([3, 3, 3]).buffer);
+
+            const proto = await test.exportProto();
+            const test2 = await Test.importProto(proto);
+
+            assert.equal(test.items.length, test2.items.length);
+            assert.equal(test.items[0].byteLength, test2.items[0].byteLength);
+            assert.equal(test.items[1].byteLength, test2.items[1].byteLength);
+            assert.equal(test.items[2].byteLength, test2.items[2].byteLength);
+        })()
+            .then(done, done);
+    });
 
         it("parser type", (done) => {
             (async () => {

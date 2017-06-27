@@ -10,14 +10,14 @@ export class ArrayBufferConverter {
         return new Uint8Array(value);
     }
     public static async get(value: Uint8Array) {
-        return value.buffer;
-    };
+        return new Uint8Array(value).buffer;
+    }
 }
 
 export class StringConverter {
     public static async set(value: string) {
         return new Uint8Array(Convert.FromUtf8String(value));
-    };
+    }
     public static async get(value: Uint8Array) {
         return Convert.ToUtf8String(value);
     }
