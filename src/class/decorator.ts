@@ -6,7 +6,7 @@ export function ProtobufElement(params: IProtobufElement) {
     return <TFunction extends Function>(target: TFunction) => {
         const t: IProtobufScheme = target as any;
 
-        t.localName = params.name || (t as any).name;
+        t.localName = params.name || (t as any).name || t.toString().match(/^function\s*([^\s(]+)/)[1];
         t.items = t.items || {};
         t.target = target;
         t.items = assign({}, t.items);
