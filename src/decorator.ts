@@ -3,6 +3,7 @@ import { assign } from "pvtsutils";
 import { IProtobufElement, IProtobufScheme, IProtobufSchemeItem } from "./type";
 
 export function ProtobufElement(params: IProtobufElement) {
+    // tslint:disable-next-line: ban-types
     return <TFunction extends Function>(target: TFunction) => {
         const t: IProtobufScheme = target as any;
 
@@ -32,14 +33,14 @@ function defineProperty(target: any, key: string, params: any) {
 
     const opt = {
         // tslint:disable-next-line:only-arrow-functions object-literal-shorthand
-        set: function (v: any) {
+        set: function(v: any) {
             if (this[propertyKey] !== v) {
                 this.raw = null;
                 this[propertyKey] = v;
             }
         },
         // tslint:disable-next-line:only-arrow-functions object-literal-shorthand
-        get: function () {
+        get: function() {
             if (this[propertyKey] === void 0) {
                 let defaultValue = params.defaultValue;
                 if (params.parser && !params.repeated) {
@@ -59,7 +60,7 @@ function defineProperty(target: any, key: string, params: any) {
 }
 
 export function ProtobufProperty<T>(params: IProtobufSchemeItem<T>) {
-    return (target: Object, propertyKey: string | symbol) => {
+    return (target: object, propertyKey: string | symbol) => {
         const t: IProtobufScheme = target.constructor as any;
         const key = propertyKey as string;
 

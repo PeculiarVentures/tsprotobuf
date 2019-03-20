@@ -1,3 +1,3 @@
-// Needed for tests.
-
-export * from "./class";
+export * from "./converter";
+export * from "./decorator";
+export * from "./object_proto";

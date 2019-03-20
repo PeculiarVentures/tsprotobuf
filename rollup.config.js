@@ -1,26 +1,48 @@
-import typescript from "rollup-plugin-typescript";
+import { dts, ts } from "rollup-plugin-dts";
 
-let pkg = require("./package.json");
+const pkg = require("./package.json");
+const external = Object.keys(pkg.dependencies);
+const banner = [].join("\n");
+const input = "src/class/index.ts";
 
-let banner = [];
-
-export default {
-    entry: "src/class/index.ts",
+export default [
+  // main
+  {
+    input,
     plugins: [
-        typescript({ typescript: require("typescript"), target: "es5", removeComments: true }),
+      ts({
+        compilerOptions: {
+          removeComments: true,
+        },
+      }),
     ],
-    banner: banner.join("\n"),
-    external: ["protobufjs", "tslib", "pvtsutils"],
-    globals: {
-        protobufjs: "protobufjs",
-        tslib: "tslib",
-        pvtsutils: "pvtsutils",
-    },
-    targets: [
-        {
-            dest: pkg.main,
-            format: "umd",
-            moduleName: "tsprotobuf"
-        }
+    external,
+    output: [
+      {
+        banner,
+        file: pkg.main,
+        format: "cjs",
+      },
+      {
+        banner,
+        file: pkg.module,
+        format: "es",
+      }
     ]
-};
+  },
+  // types
+  {
+    input,
+    plugins: [
+      dts(),
+    ],
+    external,
+    output: [
+      {
+        banner,
+        file: pkg.types,
+        format: "es",
+      }
+    ]
+  },
+];

@@ -1,7 +1,7 @@
 import { assert } from "chai";
 import * as util from "pvtsutils";
-import { ObjectProto, ProtobufElement, ProtobufProperty } from "../";
-import { ArrayBufferConverter, StringConverter } from "../";
+import { ObjectProto, ProtobufElement, ProtobufProperty } from "../src";
+import { ArrayBufferConverter, StringConverter } from "../src";
 
 context("proto", () => {
 
@@ -549,32 +549,32 @@ context("proto", () => {
         });
 
         it("converter ArrayBuffer", (done) => {
-        @ProtobufElement({ name: "Test" })
-        class Test extends ObjectProto {
+            @ProtobufElement({ name: "Test" })
+            class Test extends ObjectProto {
 
-            public static INDEX = 0;
+                public static INDEX = 0;
 
-            @ProtobufProperty({ id: Test.INDEX++, repeated: true, converter: ArrayBufferConverter })
-            public items: ArrayBuffer[] = [];
+                @ProtobufProperty({ id: Test.INDEX++, repeated: true, converter: ArrayBufferConverter })
+                public items: ArrayBuffer[] = [];
 
-        }
+            }
 
-        (async () => {
-            const test = new Test();
-            test.items.push(new Uint8Array([1]).buffer);
-            test.items.push(new Uint8Array([2, 2]).buffer);
-            test.items.push(new Uint8Array([3, 3, 3]).buffer);
+            (async () => {
+                const test = new Test();
+                test.items.push(new Uint8Array([1]).buffer);
+                test.items.push(new Uint8Array([2, 2]).buffer);
+                test.items.push(new Uint8Array([3, 3, 3]).buffer);
 
-            const proto = await test.exportProto();
-            const test2 = await Test.importProto(proto);
+                const proto = await test.exportProto();
+                const test2 = await Test.importProto(proto);
 
-            assert.equal(test.items.length, test2.items.length);
-            assert.equal(test.items[0].byteLength, test2.items[0].byteLength);
-            assert.equal(test.items[1].byteLength, test2.items[1].byteLength);
-            assert.equal(test.items[2].byteLength, test2.items[2].byteLength);
-        })()
-            .then(done, done);
-    });
+                assert.equal(test.items.length, test2.items.length);
+                assert.equal(test.items[0].byteLength, test2.items[0].byteLength);
+                assert.equal(test.items[1].byteLength, test2.items[1].byteLength);
+                assert.equal(test.items[2].byteLength, test2.items[2].byteLength);
+            })()
+                .then(done, done);
+        });
 
         it("parser type", (done) => {
             (async () => {

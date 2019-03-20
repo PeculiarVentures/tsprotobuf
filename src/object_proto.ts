@@ -2,7 +2,7 @@ import { IProtobufScheme, IProtobufSchemeItem, IProtobufSerializable } from "./t
 
 export class ObjectProto implements IProtobufSerializable {
 
-    public static async importProto<T extends ObjectProto>(this: { new (): T }, data: ArrayBuffer | ObjectProto) {
+    public static async importProto<T extends ObjectProto>(this: new () => T, data: ArrayBuffer | ObjectProto) {
         const res = new this();
         await res.importProto(data);
         return res;
