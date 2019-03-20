@@ -6,19 +6,14 @@
   "types": "index.d.ts",
   "module": "dist/tsprotobuf.es.js",
   "scripts": {
-    "test": "mocha out/test/**/*.js",
-    "build": "npm run build:dist",
-    "build:es5": "rollup -c",
-    "build:map": "tsc --sourceMap",
-    "build:es2015": "rollup -c rollup.config.es.js",
-    "build:dist": "npm run build:es5 && npm run build:es2015",
-    "prepub": "npm run build",
-    "pub": "npm version patch && npm publish && git push",
-    "precoverage": "npm run build:map",
+    "test": "mocha",
+    "build": "rollup -c",
+    "lint": "tslint -p .",
+    "lint:fix": "tslint --fix -p .",
     "coverage": "nyc npm test",
-    "precoveragehtml": "npm run coverage",
-    "coveragehtml": "nyc report -r html",
-    "coveralls": "nyc report --reporter=text-lcov | coveralls"
+    "coveralls": "nyc report --reporter=text-lcov | coveralls",
+    "prepub": "npm run lint && npm run test && npm run build",
+    "pub": "npm version patch && npm publish --access=public && git push"
   },
   "keywords": [
     "protobuf",
@@ -39,19 +34,37 @@
   },
   "homepage": "https://github.com/PeculiarVentures/tsprotobuf#readme",
   "dependencies": {
-    "@types/long": "^3.0.31",
-    "protobufjs": "6.7.3",
-    "pvtsutils": "^1.0.1"
+    "@types/long": "^4.0.0",
+    "protobufjs": "^6.8.8",
+    "pvtsutils": "^1.0.4"
   },
   "devDependencies": {
-    "@types/chai": "^3.4.34",
-    "@types/mocha": "^2.2.39",
-    "chai": "^3.5.0",
-    "coveralls": "^2",
-    "mocha": "^3.2.0",
-    "nyc": "^10",
-    "rollup": "^0.41.4",
-    "rollup-plugin-typescript": "^0.8.1",
-    "typescript": "^2.1.5"
+    "@types/chai": "^4.1.7",
+    "@types/mocha": "^5.2.6",
+    "chai": "^4.2.0",
+    "coveralls": "^3.0.3",
+    "mocha": "^6.0.2",
+    "nyc": "^13.3.0",
+    "rollup": "^1.7.0",
+    "rollup-plugin-dts": "^0.13.0",
+    "ts-node": "^8.0.3",
+    "tslint": "^5.14.0",
+    "typescript": "^3.3.4000"
+  },
+  "nyc": {
+    "extension": [
+      ".ts",
+      ".tsx"
+    ],
+    "include": [
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "**/*.d.ts"
+    ],
+    "reporter": [
+      "text-summary",
+      "html"
+    ]
   }
 }
