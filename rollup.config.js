@@ -3,7 +3,7 @@ import { dts, ts } from "rollup-plugin-dts";
 const pkg = require("./package.json");
 const external = Object.keys(pkg.dependencies);
 const banner = [].join("\n");
-const input = "src/class/index.ts";
+const input = "src/index.ts";
 
 export default [
   // main
