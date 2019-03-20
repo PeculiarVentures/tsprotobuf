@@ -47,7 +47,7 @@ export class ObjectProto implements IProtobufSerializable {
             raw = data;
         }
         try {
-            scheme = thisStatic.protobuf.decode(new Uint8Array(raw)).toObject();
+            scheme = thisStatic.protobuf.decode(new Uint8Array(raw));
         } catch (e) {
             throw new Error(`Error: Cannot decode message for ${thisStatic.localName}.\n$ProtobufError: ${e.message}`);
         }
