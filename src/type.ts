@@ -1,6 +1,6 @@
 import { Type } from "protobufjs";
 import { IConverter } from "./converter";
-import { ObjectProto } from "./object_proto";
+import type { ObjectProto } from "./object_proto";
 
 export interface IProtobufSerializable {
     importProto(raw: ArrayBuffer): PromiseLike<void>;
