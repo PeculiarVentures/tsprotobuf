@@ -9,6 +9,6 @@
         "outDir": "out"
     },
     "exclude": [
-        "index.d.ts"
+        "dist"
     ]
 }
