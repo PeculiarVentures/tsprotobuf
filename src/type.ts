@@ -1,4 +1,4 @@
-import { Type } from "protobufjs";
+import type { Type } from "protobufjs";
 import { IConverter } from "./converter";
 import type { ObjectProto } from "./object_proto";
 
