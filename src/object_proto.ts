@@ -137,7 +137,7 @@ export class ObjectProto implements IProtobufSerializable {
             }
             if (template.converter) {
                 // Converter
-                if (value) {
+                if (value !== undefined) {
                     result = await template.converter.set(value);
                 }
             } else {
