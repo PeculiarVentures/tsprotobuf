@@ -13,7 +13,7 @@ context("proto", () => {
         @ProtobufElement({ name: "test" })
         class TestProto extends ObjectProto {
           @ProtobufProperty({ name: "data", type: "string", id: 1 })
-          public data: string;
+          public data!: string;
         }
 
         const test1 = new TestProto();
@@ -34,7 +34,7 @@ context("proto", () => {
         @ProtobufElement({ name: "test" })
         class TestProto extends ObjectProto {
           @ProtobufProperty({ name: "data", id: 1 })
-          public data: ArrayBuffer;
+          public data!: ArrayBuffer;
         }
 
         const test1 = new TestProto();
@@ -55,7 +55,7 @@ context("proto", () => {
         @ProtobufElement({ name: "test" })
         class TestProto extends ObjectProto {
           @ProtobufProperty({ name: "data", id: 1, type: "uint32" })
-          public data: number;
+          public data!: number;
         }
 
         const test1 = new TestProto();
@@ -76,7 +76,7 @@ context("proto", () => {
         @ProtobufElement({ name: "test" })
         class TestProto extends ObjectProto {
           @ProtobufProperty({ name: "data", id: 1, type: "bool" })
-          public data: boolean;
+          public data!: boolean;
         }
 
         const test1 = new TestProto();
@@ -101,7 +101,7 @@ context("proto", () => {
         @ProtobufElement({ name: "test" })
         class TestProto extends ObjectProto {
           @ProtobufProperty({ name: "data", id: 1, type: "bytes", converter: ArrayBufferConverter })
-          public data: ArrayBuffer;
+          public data!: ArrayBuffer;
         }
 
         const test1 = new TestProto();
@@ -122,7 +122,7 @@ context("proto", () => {
         @ProtobufElement({ name: "test" })
         class TestProto extends ObjectProto {
           @ProtobufProperty({ name: "data", id: 1, type: "bytes", converter: StringConverter })
-          public data: string;
+          public data!: string;
         }
 
         const test1 = new TestProto();
@@ -143,30 +143,65 @@ context("proto", () => {
 
     context("optional", () => {
 
-      it("with default value", (done) => {
-        async function Test() {
+      it("with default value", async () => {
+        @ProtobufElement({ name: "test" })
+        class TestProto extends ObjectProto {
+          @ProtobufProperty({ name: "version", id: 1, type: "uint32", required: true })
+          public version = 0;
 
-          @ProtobufElement({ name: "test" })
-          class TestProto extends ObjectProto {
-            @ProtobufProperty({ name: "version", id: 1, type: "uint32", required: true })
-            public version: number;
-
-            @ProtobufProperty({ name: "data", id: 2, type: "bytes", converter: StringConverter, defaultValue: "empty" })
-            public data: string;
-          }
-
-          const test1 = new TestProto();
-          test1.version = 1;
-          assert.equal(test1.data, "empty");
-
-          const raw = await test1.exportProto();
-
-          const test2 = await TestProto.importProto(raw);
-          assert.equal(test2.data, test2.data);
-          assert.equal(test2.data, "empty");
+          @ProtobufProperty({ name: "data", id: 2, type: "bytes", converter: StringConverter, defaultValue: "empty" })
+          public data!: string;
         }
 
-        Test().then(done, done);
+        const test1 = new TestProto();
+        test1.version = 1;
+        assert.equal(test1.data, "empty");
+
+        const raw = await test1.exportProto();
+
+        const test2 = await TestProto.importProto(raw);
+        assert.equal(test2.data, test1.data);
+        assert.equal(test2.data, "empty");
+      });
+
+      it("empty value", async () => {
+        @ProtobufElement({ name: "test" })
+        class TestProto extends ObjectProto {
+
+          static INDEX = 1;
+
+          @ProtobufProperty({ name: "version", id: TestProto.INDEX++, type: "uint32", required: true })
+          public version = 0;
+
+          @ProtobufProperty({ name: "data", id: TestProto.INDEX++, type: "string" })
+          public data?: string;
+
+          @ProtobufProperty({ name: "bytes", id: TestProto.INDEX++ })
+          public bytes?: ArrayBuffer;
+
+          @ProtobufProperty({ name: "bool", id: TestProto.INDEX++, type: "bool" })
+          public bool?: boolean;
+
+          @ProtobufProperty({ name: "uint32", id: TestProto.INDEX++, type: "uint32" })
+          public uint32?: number;
+
+          @ProtobufProperty({ id: TestProto.INDEX++, type: "uint32", required: true })
+          public end = 1;
+        }
+
+        const test1 = new TestProto();
+        test1.version = 1;
+        assert.equal(test1.data, undefined);
+        assert.equal(test1.bytes, undefined);
+        assert.equal(test1.bool, undefined);
+        assert.equal(test1.uint32, undefined);
+        assert.equal(test1.end, 1);
+
+        const raw = await test1.exportProto();
+
+        const test2 = await TestProto.importProto(raw);
+        assert.equal(test2.data, test1.data);
+        assert.equal(test2.data, undefined);
       });
 
     });
@@ -177,7 +212,7 @@ context("proto", () => {
     @ProtobufElement({ name: "test" })
     class TestProto extends ObjectProto {
       @ProtobufProperty({ name: "data", id: 1, type: "bytes", converter: StringConverter })
-      public data: string;
+      public data!: string;
     }
 
     const test = new TestProto();
@@ -195,7 +230,7 @@ context("proto", () => {
       @ProtobufElement({ name: "test" })
       class TestProto extends ObjectProto {
         @ProtobufProperty({ name: "data", id: 1, type: "bytes", converter: StringConverter })
-        public data: string;
+        public data!: string;
       }
 
       const test = new TestProto();
@@ -213,13 +248,13 @@ context("proto", () => {
       @ProtobufElement({ name: "child" })
       class ChildProto extends ObjectProto {
         @ProtobufProperty({ name: "data", id: 1, type: "bytes", converter: StringConverter })
-        public data: string;
+        public data!: string;
       }
 
       @ProtobufElement({ name: "parent" })
       class ParentProto extends ObjectProto {
         @ProtobufProperty({ name: "child", id: 1, type: "bytes", parser: ChildProto })
-        public child: ChildProto;
+        public child!: ChildProto;
       }
 
       const parent = new ParentProto();
@@ -241,7 +276,7 @@ context("proto", () => {
         @ProtobufElement({ name: "test" })
         class TestProto extends ObjectProto {
           @ProtobufProperty({ name: "data", id: 1, type: "bytes", converter: StringConverter })
-          public data: string;
+          public data!: string;
         }
 
         const buffer = new Uint8Array([9, 8, 7, 6, 5, 4, 3, 2, 1]).buffer;
@@ -263,7 +298,7 @@ context("proto", () => {
         @ProtobufElement({ name: "test" })
         class TestProto extends ObjectProto {
           @ProtobufProperty({ name: "data", id: 1, type: "bytes", converter: StringConverter })
-          public data: string;
+          public data!: string;
         }
 
         const test = new TestProto();
@@ -286,13 +321,13 @@ context("proto", () => {
         @ProtobufElement({ name: "child" })
         class ChildProto extends ObjectProto {
           @ProtobufProperty({ name: "data", id: 1, type: "bytes", converter: StringConverter })
-          public data: string;
+          public data!: string;
         }
 
         @ProtobufElement({ name: "parent" })
         class ParentProto extends ObjectProto {
           @ProtobufProperty({ name: "child", id: 1, type: "bytes", parser: ChildProto })
-          public child: ChildProto;
+          public child!: ChildProto;
         }
 
         const parent = new ParentProto();
@@ -311,15 +346,15 @@ context("proto", () => {
         @ProtobufElement({ name: "child" })
         class ChildProto extends ObjectProto {
           @ProtobufProperty({ name: "data", id: 1, type: "bytes", converter: StringConverter })
-          public data: string;
+          public data!: string;
         }
 
         @ProtobufElement({ name: "parent" })
         class ParentProto extends ObjectProto {
           @ProtobufProperty({ name: "child", id: 1, type: "bytes", parser: ChildProto, required: true })
-          public child: ChildProto;
+          public child!: ChildProto;
           @ProtobufProperty({ name: "version", id: 2, type: "uint32" })
-          public version: number;
+          public version!: number;
         }
 
         const parent = new ParentProto();
@@ -348,22 +383,22 @@ context("proto", () => {
         @ProtobufElement({ name: "child" })
         class ChildProto extends ObjectProto {
           @ProtobufProperty({ name: "data", id: 1, type: "bytes", converter: StringConverter })
-          public data: string;
+          public data!: string;
         }
 
         @ProtobufElement({ name: "parent" })
         class ParentProto extends ObjectProto {
           @ProtobufProperty({ name: "child", id: 1, type: "bytes", parser: ChildProto })
-          public child: ChildProto;
+          public child!: ChildProto;
           @ProtobufProperty({ name: "version", id: 2, type: "uint32" })
-          public version: number;
+          public version!: number;
         }
         @ProtobufElement({ name: "parent" })
         class ParentWithRequiredProto extends ObjectProto {
           @ProtobufProperty({ name: "child", id: 1, type: "bytes", parser: ChildProto, required: true })
-          public child: ChildProto;
+          public child!: ChildProto;
           @ProtobufProperty({ name: "version", id: 2, type: "uint32" })
-          public version: number;
+          public version!: number;
         }
 
         const parent = new ParentProto();
@@ -390,16 +425,16 @@ context("proto", () => {
         @ProtobufElement({ name: "parent" })
         class ParentProto extends ObjectProto {
           @ProtobufProperty({ name: "child", id: 1, type: "bytes", converter: StringConverter })
-          public data: string;
+          public data!: string;
           @ProtobufProperty({ name: "version", id: 2, type: "uint32" })
-          public version: number;
+          public version!: number;
         }
         @ProtobufElement({ name: "parent" })
         class ParentWithRequiredProto extends ObjectProto {
           @ProtobufProperty({ name: "child", id: 1, type: "bytes", converter: StringConverter, required: true })
-          public data: string;
+          public data!: string;
           @ProtobufProperty({ name: "version", id: 2, type: "uint32" })
-          public version: number;
+          public version!: number;
         }
 
         const parent = new ParentProto();
@@ -422,9 +457,9 @@ context("proto", () => {
         @ProtobufElement({ name: "parent" })
         class ParentProto extends ObjectProto {
           @ProtobufProperty({ name: "child", id: 1, type: "bytes", converter: StringConverter, required: true })
-          public data: string;
+          public data!: string;
           @ProtobufProperty({ name: "version", id: 2, type: "uint32" })
-          public version: number;
+          public version!: number;
         }
 
         const parent = new ParentProto();
@@ -454,7 +489,7 @@ context("proto", () => {
           public static INDEX = 0;
 
           @ProtobufProperty({ type: "string", id: Test.INDEX++, repeated: true })
-          public names: string[];
+          public names!: string[];
         }
 
         const test = new Test();
@@ -487,18 +522,16 @@ context("proto", () => {
           public static INDEX = 0;
 
           @ProtobufProperty({ type: "string", id: Test.INDEX++, required: true })
-          public id: string;
+          public id = "";
 
           @ProtobufProperty({ type: "string", id: Test.INDEX++, required: true })
-          public name: string;
+          public name = "";
 
           @ProtobufProperty({ type: "string", id: Test.INDEX++, repeated: true })
-          public algorithms: string[];
+          public algorithms: string[] = [];
         }
 
         const test = new Test();
-        test.id = "";
-        test.name = "";
         test.algorithms = ["1", "2", "3", "4", "5"];
 
         assert.equal(test.algorithms.length, 5);
@@ -506,6 +539,8 @@ context("proto", () => {
         const raw = await test.exportProto();
 
         const test2 = await Test.importProto(raw);
+        assert.equal(test2.id, "");
+        assert.equal(test2.name, "");
         assert.equal(test2.algorithms.length, 5);
 
         assert.equal(test2.algorithms.length, test.algorithms.length);
@@ -523,7 +558,7 @@ context("proto", () => {
           public static INDEX = 0;
 
           @ProtobufProperty({ type: "bytes", id: Test.INDEX++, repeated: true, converter: StringConverter })
-          public names: string[];
+          public names!: string[];
         }
 
         const test = new Test();
@@ -585,10 +620,10 @@ context("proto", () => {
           public static INDEX = 0;
 
           @ProtobufProperty({ id: Child.INDEX++, type: "uint32" })
-          public id: number;
+          public id!: number;
 
           @ProtobufProperty({ id: Child.INDEX++, type: "string" })
-          public name: string;
+          public name!: string;
 
           public constructor();
           public constructor(id: number, name: string);
@@ -608,7 +643,7 @@ context("proto", () => {
           public static INDEX = 0;
 
           @ProtobufProperty({ type: "bytes", id: Test.INDEX++, repeated: true, parser: Child })
-          public children: Child[];
+          public children!: Child[];
         }
 
         const test = new Test();
@@ -643,10 +678,10 @@ context("proto", () => {
           public static INDEX = 0;
 
           @ProtobufProperty({ id: Child.INDEX++, type: "uint32" })
-          public id: number;
+          public id!: number;
 
           @ProtobufProperty({ id: Child.INDEX++, type: "string" })
-          public name: string;
+          public name!: string;
 
           public constructor();
           public constructor(id: number, name: string);
@@ -666,7 +701,7 @@ context("proto", () => {
           public static INDEX = 0;
 
           @ProtobufProperty({ type: "bytes", id: Test.INDEX++, repeated: true, parser: Child })
-          public children: Child[];
+          public children!: Child[];
         }
 
         const test = new Test();
