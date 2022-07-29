@@ -20,8 +20,7 @@
     "prepub:next": "npm run lint && npm run build",
     "pub:next": "npm version prerelease --preid=next && npm publish --tag next",
     "postpub:next": "git push",
-    "coverage": "nyc npm test",
-    "coveralls": "nyc report --reporter=text-lcov | coveralls"
+    "coverage": "nyc npm test"
   },
   "keywords": [
     "protobuf",
@@ -60,30 +59,5 @@
     "ts-node": "^10.9.1",
     "tslint": "^6.1.3",
     "typescript": "^4.7.4"
-  },
-  "nyc": {
-    "extension": [
-      ".ts",
-      ".tsx"
-    ],
-    "include": [
-      "src/**/*.ts"
-    ],
-    "exclude": [
-      "**/*.d.ts"
-    ],
-    "reporter": [
-      "text-summary",
-      "html"
-    ]
-  },
-  "mocha": {
-    "require": "ts-node/register",
-    "extension": [
-      "ts"
-    ],
-    "watch-files": [
-      "test/**/*.ts"
-    ]
   }
 }
