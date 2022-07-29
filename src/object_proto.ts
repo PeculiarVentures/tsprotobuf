@@ -39,7 +39,7 @@ export class ObjectProto implements IProtobufSerializable {
     public async importProto(data: ArrayBuffer | ObjectProto) {
         const thisStatic = this.constructor as IProtobufScheme;
         const that = this as any;
-        let scheme: { [key: string]: any };
+        let scheme: { [key: string]: any; };
         let raw: ArrayBuffer;
         if (data instanceof ObjectProto) {
             raw = await data.exportProto();
@@ -47,51 +47,49 @@ export class ObjectProto implements IProtobufSerializable {
             raw = data;
         }
         try {
+            if (!thisStatic.protobuf) {
+                throw new Error("Protobuf schema doesn't contain 'protobuf' property");
+            }
             scheme = thisStatic.protobuf.decode(new Uint8Array(raw));
         } catch (e) {
-            throw new Error(`Error: Cannot decode message for ${thisStatic.localName}.\n$ProtobufError: ${e.message}`);
+            const err = e instanceof Error ? e : new Error("Unknown error");
+            throw new Error(`Error: Cannot decode message for ${thisStatic.localName}.\n$ProtobufError: ${err.message}`);
         }
         for (const key in thisStatic.items) {
             const item = thisStatic.items[key];
+            if (!item.required && !scheme.hasOwnProperty(item.name)) {
+                // Skip the property if field is optional and doesn't present in the scheme
+                continue;
+            }
 
-            let schemeValues = scheme[item.name];
-            if (ArrayBuffer.isView(schemeValues)) {
-                // Convert Buffer to Uint8Array
-                schemeValues = new Uint8Array(schemeValues as Uint8Array);
-            }
-            // console.log(`Import:${thisStatic.localName}:${item.name}`);
-            if (!Array.isArray(schemeValues)) {
-                if (item.repeated) {
-                    // INFO: empty protobuf array returns undefined
-                    that[key] = schemeValues = [];
-                } else {
-                    // Convert single element to array
-                    schemeValues = [schemeValues];
-                }
-            }
-            if (item.repeated && !that[key]) {
+            const schemeValue = scheme[item.name];
+
+            if (item.repeated) {
                 // initialize empty array for repeated scheme
                 that[key] = [];
-            }
-            for (const schemeValue of schemeValues) {
-                if (item.repeated) {
-                    that[key].push(await this.importItem(item, schemeValue));
-                } else {
-                    that[key] = await this.importItem(item, schemeValue);
+
+                if (!Array.isArray(schemeValue)) {
+                    throw new Error(`Cannot decode message for '${thisStatic.localName}'. Schema field '${item.name}' must be array`);
                 }
+
+                for (const value of schemeValue) {
+                    that[key].push(await this.importItem(item, value));
+                }
+            } else {
+                that[key] = await this.importItem(item, schemeValue);
             }
         }
         this.raw = raw;
     }
 
-    public async exportProto() {
-        if (!this.hasChanged()) {
+    public async exportProto(): Promise<ArrayBuffer> {
+        if (!this.hasChanged() && this.raw) {
             return this.raw;
         }
 
         const thisStatic = this.constructor as IProtobufScheme;
         const that = this as any;
-        const protobuf: { [key: string]: any } = {};
+        const protobuf: { [key: string]: any; } = {};
         for (const key in thisStatic.items) {
             const item = thisStatic.items[key];
 
@@ -114,7 +112,7 @@ export class ObjectProto implements IProtobufSerializable {
                 }
             }
         }
-        this.raw = new Uint8Array(thisStatic.protobuf.encode(protobuf).finish()).buffer;
+        this.raw = new Uint8Array(thisStatic.protobuf!.encode(protobuf).finish()).buffer;
         return this.raw;
     }
 
