@@ -1,4 +1,4 @@
-import { assert } from "chai";
+import * as assert from "assert";
 import * as util from "pvtsutils";
 import { ObjectProto, ProtobufElement, ProtobufProperty } from "../src";
 import { ArrayBufferConverter, StringConverter } from "../src";
@@ -7,134 +7,104 @@ context("proto", () => {
 
   context("simple types", () => {
 
-    it("string", (done) => {
-      async function Test() {
-
-        @ProtobufElement({ name: "test" })
-        class TestProto extends ObjectProto {
-          @ProtobufProperty({ name: "data", type: "string", id: 1 })
-          public data!: string;
-        }
-
-        const test1 = new TestProto();
-        test1.data = "hello";
-
-        const raw = await test1.exportProto();
-
-        const test2 = await TestProto.importProto(raw);
-        assert.equal(test1.data, test2.data);
+    it("string", async () => {
+      @ProtobufElement({ name: "test" })
+      class TestProto extends ObjectProto {
+        @ProtobufProperty({ name: "data", type: "string", id: 1 })
+        public data!: string;
       }
 
-      Test().then(done, done);
+      const test1 = new TestProto();
+      test1.data = "hello";
+
+      const raw = await test1.exportProto();
+
+      const test2 = await TestProto.importProto(raw);
+      assert.equal(test1.data, test2.data);
     });
 
-    it("bytes", (done) => {
-      async function Test() {
-
-        @ProtobufElement({ name: "test" })
-        class TestProto extends ObjectProto {
-          @ProtobufProperty({ name: "data", id: 1 })
-          public data!: ArrayBuffer;
-        }
-
-        const test1 = new TestProto();
-        test1.data = util.Convert.FromUtf8String("Hello");
-
-        const raw = await test1.exportProto();
-
-        const test2 = await TestProto.importProto(raw);
-        assert.isTrue(util.isEqual(test1.data, test2.data));
+    it("bytes", async () => {
+      @ProtobufElement({ name: "test" })
+      class TestProto extends ObjectProto {
+        @ProtobufProperty({ name: "data", id: 1 })
+        public data!: ArrayBuffer;
       }
 
-      Test().then(done, done);
+      const test1 = new TestProto();
+      test1.data = util.Convert.FromUtf8String("Hello");
+
+      const raw = await test1.exportProto();
+
+      const test2 = await TestProto.importProto(raw);
+      assert.ok(util.isEqual(test1.data, test2.data));
     });
 
-    it("uint32", (done) => {
-      async function Test() {
-
-        @ProtobufElement({ name: "test" })
-        class TestProto extends ObjectProto {
-          @ProtobufProperty({ name: "data", id: 1, type: "uint32" })
-          public data!: number;
-        }
-
-        const test1 = new TestProto();
-        test1.data = 3;
-
-        const raw = await test1.exportProto();
-
-        const test2 = await TestProto.importProto(raw);
-        assert.equal(test1.data, test2.data);
+    it("uint32", async () => {
+      @ProtobufElement({ name: "test" })
+      class TestProto extends ObjectProto {
+        @ProtobufProperty({ name: "data", id: 1, type: "uint32" })
+        public data!: number;
       }
 
-      Test().then(done, done);
+      const test1 = new TestProto();
+      test1.data = 3;
+
+      const raw = await test1.exportProto();
+
+      const test2 = await TestProto.importProto(raw);
+      assert.equal(test1.data, test2.data);
     });
 
-    it("bool", (done) => {
-      async function Test() {
-
-        @ProtobufElement({ name: "test" })
-        class TestProto extends ObjectProto {
-          @ProtobufProperty({ name: "data", id: 1, type: "bool" })
-          public data!: boolean;
-        }
-
-        const test1 = new TestProto();
-        test1.data = true;
-
-        const raw = await test1.exportProto();
-
-        const test2 = await TestProto.importProto(raw);
-        assert.equal(test1.data, test2.data);
+    it("bool", async () => {
+      @ProtobufElement({ name: "test" })
+      class TestProto extends ObjectProto {
+        @ProtobufProperty({ name: "data", id: 1, type: "bool" })
+        public data!: boolean;
       }
 
-      Test().then(done, done);
+      const test1 = new TestProto();
+      test1.data = true;
+
+      const raw = await test1.exportProto();
+
+      const test2 = await TestProto.importProto(raw);
+      assert.equal(test1.data, test2.data);
     });
 
   });
 
   context("Converters", () => {
 
-    it("array buffer", (done) => {
-      async function Test() {
-
-        @ProtobufElement({ name: "test" })
-        class TestProto extends ObjectProto {
-          @ProtobufProperty({ name: "data", id: 1, type: "bytes", converter: ArrayBufferConverter })
-          public data!: ArrayBuffer;
-        }
-
-        const test1 = new TestProto();
-        test1.data = util.Convert.FromUtf8String("Hello");
-
-        const raw = await test1.exportProto();
-
-        const test2 = await TestProto.importProto(raw);
-        assert.isTrue(util.isEqual(test1.data, test2.data));
+    it("array buffer", async () => {
+      @ProtobufElement({ name: "test" })
+      class TestProto extends ObjectProto {
+        @ProtobufProperty({ name: "data", id: 1, type: "bytes", converter: ArrayBufferConverter })
+        public data!: ArrayBuffer;
       }
 
-      Test().then(done, done);
+      const test1 = new TestProto();
+      test1.data = util.Convert.FromUtf8String("Hello");
+
+      const raw = await test1.exportProto();
+
+      const test2 = await TestProto.importProto(raw);
+      assert.ok(util.isEqual(test1.data, test2.data));
     });
 
-    it("string", (done) => {
-      async function Test() {
-
-        @ProtobufElement({ name: "test" })
-        class TestProto extends ObjectProto {
-          @ProtobufProperty({ name: "data", id: 1, type: "bytes", converter: StringConverter })
-          public data!: string;
-        }
-
-        const test1 = new TestProto();
-        test1.data = "Hello";
-
-        const raw = await test1.exportProto();
-
-        const test2 = await TestProto.importProto(raw);
-        assert.equal(test1.data, test2.data);
+    it("string", async () => {
+      @ProtobufElement({ name: "test" })
+      class TestProto extends ObjectProto {
+        @ProtobufProperty({ name: "data", id: 1, type: "bytes", converter: StringConverter })
+        public data!: string;
       }
 
-      Test().then(done, done);
+      const test1 = new TestProto();
+      test1.data = "Hello";
+
+      const raw = await test1.exportProto();
+
+      const test2 = await TestProto.importProto(raw);
+      assert.equal(test1.data, test2.data);
     });
 
   });
@@ -217,11 +187,11 @@ context("proto", () => {
 
     const test = new TestProto();
 
-    assert.isTrue(test.isEmpty());
+    assert.strictEqual(test.isEmpty(), true);
 
     test.data = "Some data";
 
-    assert.isFalse(test.isEmpty());
+    assert.strictEqual(test.isEmpty(), false);
   });
 
   context("hasChanged", () => {
@@ -235,11 +205,11 @@ context("proto", () => {
 
       const test = new TestProto();
 
-      assert.isFalse(test.hasChanged());
+      assert.strictEqual(test.hasChanged(), false);
 
       test.data = "Some data";
 
-      assert.isTrue(test.hasChanged());
+      assert.strictEqual(test.hasChanged(), true);
 
     });
 
@@ -259,11 +229,12 @@ context("proto", () => {
 
       const parent = new ParentProto();
 
-      assert.isFalse(parent.hasChanged());
+      assert.strictEqual(parent.hasChanged(), false);
 
+      parent.child = new ChildProto();
       parent.child.data = "Some data";
 
-      assert.isTrue(parent.hasChanged());
+      assert.strictEqual(parent.hasChanged(), true);
 
     });
 
@@ -271,319 +242,276 @@ context("proto", () => {
 
   context("importProto", () => {
 
-    it("wrong data", (done) => {
-      (async () => {
-        @ProtobufElement({ name: "test" })
-        class TestProto extends ObjectProto {
-          @ProtobufProperty({ name: "data", id: 1, type: "bytes", converter: StringConverter })
-          public data!: string;
-        }
+    it("wrong data", async () => {
+      @ProtobufElement({ name: "test" })
+      class TestProto extends ObjectProto {
+        @ProtobufProperty({ name: "data", id: 1, type: "bytes", converter: StringConverter })
+        public data!: string;
+      }
 
-        const buffer = new Uint8Array([9, 8, 7, 6, 5, 4, 3, 2, 1]).buffer;
-        try {
-          await TestProto.importProto(buffer);
-          assert.isTrue(false, "Must be error");
-        } catch (e) {
-          // console.log("success");
-        }
-      })().then(done, done);
+      const buffer = new Uint8Array([9, 8, 7, 6, 5, 4, 3, 2, 1]).buffer;
+      await assert.rejects(async () => {
+        await TestProto.importProto(buffer);
+      }, Error);
     });
 
   });
 
   context("exportProto", () => {
 
-    it("export cached data", (done) => {
-      (async () => {
-        @ProtobufElement({ name: "test" })
-        class TestProto extends ObjectProto {
-          @ProtobufProperty({ name: "data", id: 1, type: "bytes", converter: StringConverter })
-          public data!: string;
-        }
+    it("export cached data", async () => {
+      @ProtobufElement({ name: "test" })
+      class TestProto extends ObjectProto {
+        @ProtobufProperty({ name: "data", id: 1, type: "bytes", converter: StringConverter })
+        public data!: string;
+      }
 
-        const test = new TestProto();
-        test.data = "some data";
+      const test = new TestProto();
+      test.data = "some data";
 
-        assert.isTrue(test.hasChanged());
-        await test.exportProto();
-        assert.isFalse(test.hasChanged());
-        await test.exportProto();
-
-      })().then(done, done);
+      assert.strictEqual(test.hasChanged(), true);
+      await test.exportProto();
+      assert.strictEqual(test.hasChanged(), false);
+      await test.exportProto();
     });
 
   });
 
   context("parser", () => {
 
-    it("base", (done) => {
-      (async () => {
-        @ProtobufElement({ name: "child" })
-        class ChildProto extends ObjectProto {
-          @ProtobufProperty({ name: "data", id: 1, type: "bytes", converter: StringConverter })
-          public data!: string;
-        }
+    it("base", async () => {
+      @ProtobufElement({ name: "child" })
+      class ChildProto extends ObjectProto {
+        @ProtobufProperty({ name: "data", id: 1, type: "bytes", converter: StringConverter })
+        public data!: string;
+      }
 
-        @ProtobufElement({ name: "parent" })
-        class ParentProto extends ObjectProto {
-          @ProtobufProperty({ name: "child", id: 1, type: "bytes", parser: ChildProto })
-          public child!: ChildProto;
-        }
+      @ProtobufElement({ name: "parent" })
+      class ParentProto extends ObjectProto {
+        @ProtobufProperty({ name: "child", id: 1, type: "bytes", parser: ChildProto })
+        public child!: ChildProto;
+      }
 
-        const parent = new ParentProto();
-        parent.child.data = "Some data";
+      const parent = new ParentProto();
+      parent.child = new ChildProto();
+      parent.child.data = "Some data";
 
-        const raw = await parent.exportProto();
+      const raw = await parent.exportProto();
 
-        const parent2 = await ParentProto.importProto(raw);
+      const parent2 = await ParentProto.importProto(raw);
 
-        assert.equal(parent.child.data, parent2.child.data);
-      })().then(done, done);
+      assert.equal(parent.child.data, parent2.child.data);
     });
 
-    it("required", (done) => {
-      (async () => {
-        @ProtobufElement({ name: "child" })
-        class ChildProto extends ObjectProto {
-          @ProtobufProperty({ name: "data", id: 1, type: "bytes", converter: StringConverter })
-          public data!: string;
-        }
+    it("required", async () => {
+      @ProtobufElement({ name: "child" })
+      class ChildProto extends ObjectProto {
+        @ProtobufProperty({ name: "data", id: 1, type: "bytes", converter: StringConverter })
+        public data!: string;
+      }
 
-        @ProtobufElement({ name: "parent" })
-        class ParentProto extends ObjectProto {
-          @ProtobufProperty({ name: "child", id: 1, type: "bytes", parser: ChildProto, required: true })
-          public child!: ChildProto;
-          @ProtobufProperty({ name: "version", id: 2, type: "uint32" })
-          public version!: number;
-        }
+      @ProtobufElement({ name: "parent" })
+      class ParentProto extends ObjectProto {
+        @ProtobufProperty({ name: "child", id: 1, type: "bytes", parser: ChildProto, required: true })
+        public child!: ChildProto;
+        @ProtobufProperty({ name: "version", id: 2, type: "uint32" })
+        public version!: number;
+      }
 
-        const parent = new ParentProto();
+      const parent = new ParentProto();
 
-        parent.version = 1;
+      parent.version = 1;
 
-        // try to export data without require property
-        try {
-          await parent.exportProto();
-          assert.isTrue(false, "Must be error");
-        } catch (e) {
-          // console.log("success");
-        }
-        parent.child.data = "Some data";
+      await assert.rejects(async () => {
+        await parent.exportProto();
+      }, new Error("Parameter 'child' is required in 'parent' protobuf message."));
+      parent.child = new ChildProto();
+      parent.child.data = "Some data";
 
-        const raw = await parent.exportProto();
+      const raw = await parent.exportProto();
 
-        const parent2 = await ParentProto.importProto(raw);
+      const parent2 = await ParentProto.importProto(raw);
 
-        assert.equal(parent.child.data, parent2.child.data);
-      })().then(done, done);
+      assert.equal(parent.child.data, parent2.child.data);
     });
 
-    it("import without required data", (done) => {
-      (async () => {
-        @ProtobufElement({ name: "child" })
-        class ChildProto extends ObjectProto {
-          @ProtobufProperty({ name: "data", id: 1, type: "bytes", converter: StringConverter })
-          public data!: string;
-        }
+    it("import without required data", async () => {
+      @ProtobufElement({ name: "child" })
+      class ChildProto extends ObjectProto {
+        @ProtobufProperty({ name: "data", id: 1, type: "bytes", converter: StringConverter })
+        public data!: string;
+      }
 
-        @ProtobufElement({ name: "parent" })
-        class ParentProto extends ObjectProto {
-          @ProtobufProperty({ name: "child", id: 1, type: "bytes", parser: ChildProto })
-          public child!: ChildProto;
-          @ProtobufProperty({ name: "version", id: 2, type: "uint32" })
-          public version!: number;
-        }
-        @ProtobufElement({ name: "parent" })
-        class ParentWithRequiredProto extends ObjectProto {
-          @ProtobufProperty({ name: "child", id: 1, type: "bytes", parser: ChildProto, required: true })
-          public child!: ChildProto;
-          @ProtobufProperty({ name: "version", id: 2, type: "uint32" })
-          public version!: number;
-        }
+      @ProtobufElement({ name: "parent" })
+      class ParentProto extends ObjectProto {
+        @ProtobufProperty({ name: "child", id: 1, parser: ChildProto })
+        public child!: ChildProto;
+        @ProtobufProperty({ name: "version", id: 2, type: "uint32" })
+        public version!: number;
+      }
+      @ProtobufElement({ name: "parent" })
+      class ParentWithRequiredProto extends ObjectProto {
+        @ProtobufProperty({ name: "child", id: 1, type: "bytes", parser: ChildProto, required: true })
+        public child!: ChildProto;
+        @ProtobufProperty({ name: "version", id: 2, type: "uint32" })
+        public version!: number;
+      }
 
-        const parent = new ParentProto();
+      const parent = new ParentProto();
 
-        parent.version = 1;
+      parent.version = 1;
 
-        const raw = await parent.exportProto();
+      const raw = await parent.exportProto();
 
-        // try to import data without require property
-        try {
-          await ParentWithRequiredProto.importProto(raw);
-          assert.isTrue(false, "Must be error");
-        } catch (e) {
-          // console.log("success");
-        }
-      })().then(done, done);
+      await assert.rejects(async () => {
+        await ParentWithRequiredProto.importProto(raw);
+      }, Error);
     });
 
   });
 
   context("converter", () => {
-    it("import without required data", (done) => {
-      (async () => {
-        @ProtobufElement({ name: "parent" })
-        class ParentProto extends ObjectProto {
-          @ProtobufProperty({ name: "child", id: 1, type: "bytes", converter: StringConverter })
-          public data!: string;
-          @ProtobufProperty({ name: "version", id: 2, type: "uint32" })
-          public version!: number;
-        }
-        @ProtobufElement({ name: "parent" })
-        class ParentWithRequiredProto extends ObjectProto {
-          @ProtobufProperty({ name: "child", id: 1, type: "bytes", converter: StringConverter, required: true })
-          public data!: string;
-          @ProtobufProperty({ name: "version", id: 2, type: "uint32" })
-          public version!: number;
-        }
+    it("import without required data", async () => {
+      @ProtobufElement({ name: "parent" })
+      class ParentProto extends ObjectProto {
+        @ProtobufProperty({ name: "child", id: 1, type: "bytes", converter: StringConverter })
+        public data!: string;
+        @ProtobufProperty({ name: "version", id: 2, type: "uint32" })
+        public version!: number;
+      }
+      @ProtobufElement({ name: "parent" })
+      class ParentWithRequiredProto extends ObjectProto {
+        @ProtobufProperty({ name: "child", id: 1, type: "bytes", converter: StringConverter, required: true })
+        public data!: string;
+        @ProtobufProperty({ name: "version", id: 2, type: "uint32" })
+        public version!: number;
+      }
 
-        const parent = new ParentProto();
+      const parent = new ParentProto();
 
-        parent.version = 1;
+      parent.version = 1;
 
-        const raw = await parent.exportProto();
+      const raw = await parent.exportProto();
 
-        // try to import data without require property
-        try {
-          await ParentWithRequiredProto.importProto(raw);
-          assert.isTrue(false, "Must be error");
-        } catch (e) {
-          // console.log("success");
-        }
-      })().then(done, done);
+      await assert.rejects(async () => {
+        await ParentWithRequiredProto.importProto(raw);
+      }, Error);
     });
-    it("export without required data", (done) => {
-      (async () => {
-        @ProtobufElement({ name: "parent" })
-        class ParentProto extends ObjectProto {
-          @ProtobufProperty({ name: "child", id: 1, type: "bytes", converter: StringConverter, required: true })
-          public data!: string;
-          @ProtobufProperty({ name: "version", id: 2, type: "uint32" })
-          public version!: number;
-        }
 
-        const parent = new ParentProto();
+    it("export without required data", async () => {
+      @ProtobufElement({ name: "parent" })
+      class ParentProto extends ObjectProto {
+        @ProtobufProperty({ name: "child", id: 1, type: "bytes", converter: StringConverter, required: true })
+        public data!: string;
+        @ProtobufProperty({ name: "version", id: 2, type: "uint32" })
+        public version!: number;
+      }
 
-        parent.version = 1;
+      const parent = new ParentProto();
 
-        // try to import data without require property
-        try {
-          await parent.exportProto();
-          assert.isTrue(false, "Must be error");
-        } catch (e) {
-          // console.log("success");
-        }
-      })().then(done, done);
+      parent.version = 1;
+
+      await assert.rejects(async () => {
+        await parent.exportProto();
+      }, Error);
     });
 
   });
 
   context("repeated", () => {
 
-    it("simple type", (done) => {
-      (async () => {
+    it("simple type", async () => {
+      @ProtobufElement({ name: "Test" })
+      class Test extends ObjectProto {
 
-        @ProtobufElement({ name: "Test" })
-        class Test extends ObjectProto {
+        public static INDEX = 0;
 
-          public static INDEX = 0;
+        @ProtobufProperty({ type: "string", id: Test.INDEX++, repeated: true })
+        public names!: string[];
+      }
 
-          @ProtobufProperty({ type: "string", id: Test.INDEX++, repeated: true })
-          public names!: string[];
-        }
+      const test = new Test();
+      test.names = [];
 
-        const test = new Test();
-        test.names = [];
+      test.names.push("1");
+      test.names.push("2");
+      test.names.push("3");
+      test.names.push("4");
+      test.names.push("5");
 
-        test.names.push("1");
-        test.names.push("2");
-        test.names.push("3");
-        test.names.push("4");
-        test.names.push("5");
+      assert.equal(test.names.length, 5);
 
-        assert.equal(test.names.length, 5);
+      const raw = await test.exportProto();
 
-        const raw = await test.exportProto();
+      const test2 = await Test.importProto(raw);
 
-        const test2 = await Test.importProto(raw);
-
-        assert.equal(test2.names.length, test.names.length);
-        assert.equal(test2.names.join(","), "1,2,3,4,5");
-
-      })().then(done, done);
+      assert.equal(test2.names.length, test.names.length);
+      assert.equal(test2.names.join(","), "1,2,3,4,5");
     });
 
-    it("simple type 2", (done) => {
-      (async () => {
+    it("simple type 2", async () => {
+      @ProtobufElement({ name: "Test" })
+      class Test extends ObjectProto {
 
-        @ProtobufElement({ name: "Test" })
-        class Test extends ObjectProto {
+        public static INDEX = 0;
 
-          public static INDEX = 0;
+        @ProtobufProperty({ type: "string", id: Test.INDEX++, required: true })
+        public id = "";
 
-          @ProtobufProperty({ type: "string", id: Test.INDEX++, required: true })
-          public id = "";
+        @ProtobufProperty({ type: "string", id: Test.INDEX++, required: true })
+        public name = "";
 
-          @ProtobufProperty({ type: "string", id: Test.INDEX++, required: true })
-          public name = "";
+        @ProtobufProperty({ type: "string", id: Test.INDEX++, repeated: true })
+        public algorithms: string[] = [];
+      }
 
-          @ProtobufProperty({ type: "string", id: Test.INDEX++, repeated: true })
-          public algorithms: string[] = [];
-        }
+      const test = new Test();
+      test.algorithms = ["1", "2", "3", "4", "5"];
 
-        const test = new Test();
-        test.algorithms = ["1", "2", "3", "4", "5"];
+      assert.strictEqual(test.algorithms.length, 5);
 
-        assert.equal(test.algorithms.length, 5);
+      const raw = await test.exportProto();
 
-        const raw = await test.exportProto();
+      const test2 = await Test.importProto(raw);
+      assert.strictEqual(test2.id, "");
+      assert.strictEqual(test2.name, "");
+      assert.strictEqual(test2.algorithms.length, 5);
 
-        const test2 = await Test.importProto(raw);
-        assert.equal(test2.id, "");
-        assert.equal(test2.name, "");
-        assert.equal(test2.algorithms.length, 5);
-
-        assert.equal(test2.algorithms.length, test.algorithms.length);
-        assert.equal(test2.algorithms.join(","), "1,2,3,4,5");
-
-      })().then(done, done);
+      assert.strictEqual(test2.algorithms.length, test.algorithms.length);
+      assert.strictEqual(test2.algorithms.join(","), "1,2,3,4,5");
     });
 
-    it("converter type", (done) => {
-      (async () => {
+    it("converter type", async () => {
+      @ProtobufElement({ name: "Test" })
+      class Test extends ObjectProto {
 
-        @ProtobufElement({ name: "Test" })
-        class Test extends ObjectProto {
+        public static INDEX = 0;
 
-          public static INDEX = 0;
+        @ProtobufProperty({ type: "bytes", id: Test.INDEX++, repeated: true, converter: StringConverter })
+        public names!: string[];
+      }
 
-          @ProtobufProperty({ type: "bytes", id: Test.INDEX++, repeated: true, converter: StringConverter })
-          public names!: string[];
-        }
+      const test = new Test();
+      test.names = [];
 
-        const test = new Test();
-        test.names = [];
+      test.names.push("1");
+      test.names.push("2");
+      test.names.push("3");
+      test.names.push("4");
+      test.names.push("5");
 
-        test.names.push("1");
-        test.names.push("2");
-        test.names.push("3");
-        test.names.push("4");
-        test.names.push("5");
+      assert.equal(test.names.length, 5);
 
-        assert.equal(test.names.length, 5);
+      const raw = await test.exportProto();
 
-        const raw = await test.exportProto();
+      const test2 = await Test.importProto(raw);
+      assert.equal(test2.names.length, 5);
 
-        const test2 = await Test.importProto(raw);
-        assert.equal(test2.names.length, 5);
-
-        assert.equal(test2.names.length, test.names.length);
-        assert.equal(test2.names.join(","), "1,2,3,4,5");
-
-      })().then(done, done);
+      assert.equal(test2.names.length, test.names.length);
+      assert.equal(test2.names.join(","), "1,2,3,4,5");
     });
 
-    it("converter ArrayBuffer", (done) => {
+    it("converter ArrayBuffer", async () => {
       @ProtobufElement({ name: "Test" })
       class Test extends ObjectProto {
 
@@ -594,129 +522,117 @@ context("proto", () => {
 
       }
 
-      (async () => {
-        const test = new Test();
-        test.items.push(new Uint8Array([1]).buffer);
-        test.items.push(new Uint8Array([2, 2]).buffer);
-        test.items.push(new Uint8Array([3, 3, 3]).buffer);
+      const test = new Test();
+      test.items.push(new Uint8Array([1]).buffer);
+      test.items.push(new Uint8Array([2, 2]).buffer);
+      test.items.push(new Uint8Array([3, 3, 3]).buffer);
 
-        const proto = await test.exportProto();
-        const test2 = await Test.importProto(proto);
+      const proto = await test.exportProto();
+      const test2 = await Test.importProto(proto);
 
-        assert.equal(test.items.length, test2.items.length);
-        assert.equal(test.items[0].byteLength, test2.items[0].byteLength);
-        assert.equal(test.items[1].byteLength, test2.items[1].byteLength);
-        assert.equal(test.items[2].byteLength, test2.items[2].byteLength);
-      })()
-        .then(done, done);
+      assert.equal(test.items.length, test2.items.length);
+      assert.equal(test.items[0].byteLength, test2.items[0].byteLength);
+      assert.equal(test.items[1].byteLength, test2.items[1].byteLength);
+      assert.equal(test.items[2].byteLength, test2.items[2].byteLength);
     });
+  });
 
-    it("parser type", (done) => {
-      (async () => {
+  it("parser type", async () => {
+    @ProtobufElement({ name: "Child" })
+    class Child extends ObjectProto {
 
-        @ProtobufElement({ name: "Child" })
-        class Child extends ObjectProto {
+      public static INDEX = 0;
 
-          public static INDEX = 0;
+      @ProtobufProperty({ id: Child.INDEX++, type: "uint32" })
+      public id!: number;
 
-          @ProtobufProperty({ id: Child.INDEX++, type: "uint32" })
-          public id!: number;
+      @ProtobufProperty({ id: Child.INDEX++, type: "string" })
+      public name!: string;
 
-          @ProtobufProperty({ id: Child.INDEX++, type: "string" })
-          public name!: string;
-
-          public constructor();
-          public constructor(id: number, name: string);
-          public constructor(id?: number, name?: string) {
-            super();
-            if (id && name) {
-              this.name = name;
-              this.id = id;
-            }
-          }
-
+      public constructor();
+      public constructor(id: number, name: string);
+      public constructor(id?: number, name?: string) {
+        super();
+        if (id && name) {
+          this.name = name;
+          this.id = id;
         }
+      }
 
-        @ProtobufElement({ name: "Test" })
-        class Test extends ObjectProto {
+    }
 
-          public static INDEX = 0;
+    @ProtobufElement({ name: "Test" })
+    class Test extends ObjectProto {
 
-          @ProtobufProperty({ type: "bytes", id: Test.INDEX++, repeated: true, parser: Child })
-          public children!: Child[];
-        }
+      public static INDEX = 0;
 
-        const test = new Test();
-        test.children = [];
+      @ProtobufProperty({ type: "bytes", id: Test.INDEX++, repeated: true, parser: Child })
+      public children!: Child[];
+    }
 
-        test.children.push(new Child(1, "1"));
-        test.children.push(new Child(2, "2"));
-        test.children.push(new Child(3, "3"));
+    const test = new Test();
+    test.children = [];
 
-        assert.equal(test.children.length, 3);
+    test.children.push(new Child(1, "1"));
+    test.children.push(new Child(2, "2"));
+    test.children.push(new Child(3, "3"));
 
-        const raw = await test.exportProto();
+    assert.equal(test.children.length, 3);
 
-        const test2 = await Test.importProto(raw);
-        assert.equal(test2.children.length, 3);
+    const raw = await test.exportProto();
 
-        assert.equal(test2.children.length, test.children.length);
-        test.children.forEach((item, index) => {
-          assert.equal(test.children[index].id, test2.children[index].id);
-          assert.equal(test.children[index].name, test2.children[index].name);
-        });
+    const test2 = await Test.importProto(raw);
+    assert.equal(test2.children.length, 3);
 
-      })().then(done, done);
+    assert.equal(test2.children.length, test.children.length);
+    test.children.forEach((item, index) => {
+      assert.equal(test.children[index].id, test2.children[index].id);
+      assert.equal(test.children[index].name, test2.children[index].name);
     });
+  });
 
-    it("empty array", (done) => {
-      (async () => {
+  it("empty array", async () => {
+    @ProtobufElement({ name: "Child" })
+    class Child extends ObjectProto {
 
-        @ProtobufElement({ name: "Child" })
-        class Child extends ObjectProto {
+      public static INDEX = 0;
 
-          public static INDEX = 0;
+      @ProtobufProperty({ id: Child.INDEX++, type: "uint32" })
+      public id!: number;
 
-          @ProtobufProperty({ id: Child.INDEX++, type: "uint32" })
-          public id!: number;
+      @ProtobufProperty({ id: Child.INDEX++, type: "string" })
+      public name!: string;
 
-          @ProtobufProperty({ id: Child.INDEX++, type: "string" })
-          public name!: string;
-
-          public constructor();
-          public constructor(id: number, name: string);
-          public constructor(id?: number, name?: string) {
-            super();
-            if (id && name) {
-              this.name = name;
-              this.id = id;
-            }
-          }
-
+      public constructor();
+      public constructor(id: number, name: string);
+      public constructor(id?: number, name?: string) {
+        super();
+        if (id && name) {
+          this.name = name;
+          this.id = id;
         }
+      }
 
-        @ProtobufElement({ name: "Test" })
-        class Test extends ObjectProto {
+    }
 
-          public static INDEX = 0;
+    @ProtobufElement({ name: "Test" })
+    class Test extends ObjectProto {
 
-          @ProtobufProperty({ type: "bytes", id: Test.INDEX++, repeated: true, parser: Child })
-          public children!: Child[];
-        }
+      public static INDEX = 0;
 
-        const test = new Test();
-        test.children = [];
+      @ProtobufProperty({ type: "bytes", id: Test.INDEX++, repeated: true, parser: Child })
+      public children!: Child[];
+    }
 
-        assert.equal(test.children.length, 0);
+    const test = new Test();
+    test.children = [];
 
-        const raw = await test.exportProto();
+    assert.equal(test.children.length, 0);
 
-        const test2 = await Test.importProto(raw);
-        assert.equal(test2.children.length, 0);
+    const raw = await test.exportProto();
 
-      })().then(done, done);
-    });
-
+    const test2 = await Test.importProto(raw);
+    assert.equal(test2.children.length, 0);
   });
 
 });
