@@ -9,17 +9,34 @@ export interface IProtobufSerializable {
 
 export interface IProtobufScheme {
     localName?: string;
-    items?: { [key: string]: IProtobufSchemeItem<any> };
+    items?: { [key: string]: IProtobufSchemeItem<any>; };
     target?: any;
     protobuf?: Type;
 }
 
+export type ProtobufBasicTypes =
+    "double" |
+    "float" |
+    "int32" |
+    "uint32" |
+    "sint32" |
+    "fixed32" |
+    "sfixed32" |
+    "int64" |
+    "uint64" |
+    "sint64" |
+    "fixed64" |
+    "sfixed64" |
+    "bool" |
+    "string" |
+    "bytes";
+
 export interface IProtobufSchemeItem<T> {
-    name?: string;
+    name: string;
     id: number;
-    required?: boolean;
-    repeated?: boolean;
-    type?: string;
+    required: boolean;
+    repeated: boolean;
+    type: ProtobufBasicTypes;
     converter?: IConverter<T>;
     defaultValue?: T;
     parser?: typeof ObjectProto;

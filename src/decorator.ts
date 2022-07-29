@@ -1,19 +1,32 @@
 import { Field, Type } from "protobufjs";
 import { assign } from "pvtsutils";
-import { IProtobufElement, IProtobufScheme, IProtobufSchemeItem } from "./type";
+import { IConverter } from "./converter";
+import type { ObjectProto } from "./object_proto";
+import { IProtobufElement, IProtobufScheme, IProtobufSchemeItem, ProtobufBasicTypes } from "./type";
+
+export interface ProtobufPropertyParams<T = unknown> {
+    name?: string;
+    id: number;
+    required?: boolean;
+    repeated?: boolean;
+    type?: ProtobufBasicTypes;
+    converter?: IConverter<T>;
+    defaultValue?: T;
+    parser?: typeof ObjectProto;
+}
 
 export function ProtobufElement(params: IProtobufElement) {
     // tslint:disable-next-line: ban-types
     return <TFunction extends Function>(target: TFunction) => {
         const t: IProtobufScheme = target as any;
 
-        t.localName = params.name || (t as any).name || t.toString().match(/^function\s*([^\s(]+)/)[1];
+        t.localName = params.name || (t as any).name || t.toString().match(/^function\s*([^\s(]+)/)![1];
         t.items = t.items || {};
         t.target = target;
         t.items = assign({}, t.items);
 
         // create protobuf scheme
-        const scheme = new Type(t.localName);
+        const scheme = new Type(t.localName!);
         for (const key in t.items) {
             const item = t.items[key];
             let rule: string | undefined = void 0;
@@ -21,26 +34,28 @@ export function ProtobufElement(params: IProtobufElement) {
                 rule = "repeated";
             } else if (item.required) {
                 rule = "required";
+            } else {
+                rule = "optional";
             }
-            scheme.add(new Field(item.name, item.id, item.type, rule));
+            scheme.add(new Field(item.name!, item.id, item.type, rule));
         }
         t.protobuf = scheme;
     };
 }
 
-function defineProperty(target: any, key: string, params: any) {
+function defineProperty(target: any, key: string, params: IProtobufSchemeItem<any>) {
     const propertyKey = `_${key}`;
 
     const opt = {
         // tslint:disable-next-line:only-arrow-functions object-literal-shorthand
-        set: function(v: any) {
+        set: function (this: any, v: any) {
             if (this[propertyKey] !== v) {
                 this.raw = null;
                 this[propertyKey] = v;
             }
         },
         // tslint:disable-next-line:only-arrow-functions object-literal-shorthand
-        get: function() {
+        get: function (this: any,) {
             if (this[propertyKey] === void 0) {
                 let defaultValue = params.defaultValue;
                 if (params.parser && !params.repeated) {
@@ -59,31 +74,33 @@ function defineProperty(target: any, key: string, params: any) {
     Object.defineProperty(target, key, opt);
 }
 
-export function ProtobufProperty<T>(params: IProtobufSchemeItem<T>) {
+export function ProtobufProperty<T>(params: ProtobufPropertyParams<T>) {
     return (target: object, propertyKey: string | symbol) => {
         const t: IProtobufScheme = target.constructor as any;
         const key = propertyKey as string;
 
-        t.items = t.items || {};
+        t.items ??= {};
         if (t.target !== t) {
             t.items = assign({}, t.items);
             t.target = t;
         }
 
-        t.items[key] = {
+        const item: IProtobufSchemeItem<any> = t.items![key] = {
             id: params.id,
             type: params.type || "bytes",
             defaultValue: params.defaultValue,
-            converter: params.converter || null,
-            parser: params.parser || null,
+            name: params.name || key,
+            required: params.required || false,
+            repeated: params.repeated || false,
         };
-        params.name = params.name || key;
+        if (params.converter) {
+            item.converter = params.converter;
+        }
+        if (params.parser) {
+            item.parser = params.parser;
+        }
 
-        t.items[key].name = params.name;
-        t.items[key].required = params.required || false;
-        t.items[key].repeated = params.repeated || false;
-
-        defineProperty(target, key, t.items[key]);
+        defineProperty(target, key, item);
     };
 
 }
