@@ -1,6 +1,6 @@
 import typescript from "rollup-plugin-typescript2";
+import pkg from "./package.json" assert { type: "json" };
 
-const pkg = require("./package.json");
 const external = Object.keys(pkg.dependencies);
 const banner = [].join("\n");
 const input = "src/index.ts";

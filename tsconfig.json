@@ -1,14 +1,14 @@
 {
-    "compilerOptions": {
-        "module": "commonjs",
-        "target": "esnext",
-        "noImplicitAny": true,
-        "sourceMap": false,
-        "importHelpers": true,
-        "experimentalDecorators": true,
-        "outDir": "out"
-    },
-    "exclude": [
-        "dist"
-    ]
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ES2019",
+    "moduleResolution": "node",
+    "strict": true,
+    "importHelpers": true,
+    "experimentalDecorators": true,
+    "outDir": "out"
+  },
+  "exclude": [
+    "dist"
+  ]
 }

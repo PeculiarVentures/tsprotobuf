@@ -1,16 +1,22 @@
 {
-    "extends": [
-        "tslint:recommended"
+  "extends": [
+    "tslint:recommended"
+  ],
+  "rules": {
+    "typedef": [
+      true,
+      "call-signature"
     ],
-    "rules": {
-        "interface-name": false,
-        "prefer-const": true,
-        "no-var-requires": false,
-        "object-literal-sort-keys": false,
-        "no-bitwise": false,
-        "forin": false,
-        "max-line-length": false,
-        "max-classes-per-file": false,
-        "no-console": false
-    }
+    "newline-before-return": true,
+    "semicolon": true,
+    "interface-name": false,
+    "prefer-const": true,
+    "no-var-requires": false,
+    "object-literal-sort-keys": false,
+    "no-bitwise": false,
+    "forin": false,
+    "max-line-length": false,
+    "max-classes-per-file": false,
+    "no-console": false
+  }
 }
