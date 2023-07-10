@@ -1,6 +1,6 @@
 {
   "name": "tsprotobuf",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "description": "",
   "main": "dist/tsprotobuf.js",
   "types": "dist/types/index.d.ts",
