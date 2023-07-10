@@ -41,21 +41,20 @@
   },
   "homepage": "https://github.com/PeculiarVentures/tsprotobuf#readme",
   "dependencies": {
-    "@types/long": "^4.0.2",
-    "protobufjs": "^7.0.0",
+    "@types/long": "^5.0.0",
+    "protobufjs": "^7.2.4",
     "pvtsutils": "^1.3.2",
-    "tslib": "^2.4.0"
+    "tslib": "^2.6.0"
   },
   "devDependencies": {
-    "@types/chai": "^4.3.1",
-    "@types/mocha": "^9.1.1",
-    "@types/node": "^18.6.2",
-    "coveralls": "^3.1.1",
-    "mocha": "^10.0.0",
+    "@types/chai": "^4.3.5",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^20.4.1",
+    "mocha": "^10.2.0",
     "nyc": "^15.1.0",
-    "rimraf": "^3.0.2",
-    "rollup": "^2.77.2",
-    "rollup-plugin-typescript2": "^0.32.1",
+    "rimraf": "^5.0.1",
+    "rollup": "^3.26.2",
+    "rollup-plugin-typescript2": "^0.35.0",
     "ts-node": "^10.9.1",
     "tslint": "^6.1.3",
     "typescript": "^4.7.4"

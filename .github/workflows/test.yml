@@ -37,6 +37,9 @@ jobs:
         continue-on-error: true
         run: npm list
 
+      - name: Install global dependencies
+        run: npm i coveralls -g
+
       - name: Install dependencies
         run: npm i
 
