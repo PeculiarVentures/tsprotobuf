@@ -1,33 +1,36 @@
 # tsprotobuf
 
-`tsprotobuf` is a helper library that contains functions that make working with ProtoBuf easier in Typescript.
+`tsprotobuf` is a helper library equipped with functions designed to facilitate the integration of ProtoBuf in TypeScript.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Coverage Status](https://coveralls.io/repos/github/PeculiarVentures/tsprotobuf/badge.svg?branch=master)](https://coveralls.io/github/PeculiarVentures/tsprotobuf?branch=master)
-[![CircleCI](https://circleci.com/gh/PeculiarVentures/tsprotobuf.svg?style=svg)](https://circleci.com/gh/PeculiarVentures/tsprotobuf)
+[![Node.js CI](https://github.com/PeculiarVentures/tsprotobuf/actions/workflows/test.yml/badge.svg)](https://github.com/PeculiarVentures/tsprotobuf/actions/workflows/test.yml)
 
-## Install
+## Installation
 
-```
+To install `tsprotobuf`, you can use npm as follows:
+
+```shell
 npm install tsprotobuf
 ```
 
-## Using
+## Usage
 
-JavaScript:
+You can import and use `tsprotobuf` in your project as shown below:
+
+In JavaScript:
 ```javascript
 const tsprotobuf = require("tsprotobuf");
 ```
 
-TypeScript:
+In TypeScript:
 ```javascript
 import {ObjectProto, ProtobufElement, ProtobufProperty} from "tsprotobuf";
 ```
 
-The `tsprotobuf` namespace will always be available globally and also supports AMD loaders.
+Example of a Protobuf schema:
 
-Protobuf scheme:
-```
+```protobuf
 message SearchRequest {
   required string query = 1;
   optional int32 page_number = 2;
@@ -37,21 +40,92 @@ message SearchRequest {
 
 ![Screenshot](https://github.com/PeculiarVentures/tsprotobuf/blob/master/resources/screen.jpg?raw=true)
 
-## Types
+## Usage Examples
 
-There is an [index.d.ts](./index.d.ts) file which makes easy to use current module as external
+Here are some examples demonstrating how to use the `tsprotobuf` library to serialize and parse protobuf messages. The examples use the `async/await` syntax for handling promises.
+
+### Serialization
+
+```typescript
+import { ProtobufElement, ProtobufProperty, ObjectProto } from "tsprotobuf";
+
+@ProtobufElement({name: "SearchRequest"})
+class SearchRequest extends ObjectProto {
+    @ProtobufProperty({id: 1, name: "query", required: true, type: "string"})
+    public query: string;
+    @ProtobufProperty({id: 2, name: "page_number", type: "int32"})
+    public pageNumber: number;
+    @ProtobufProperty({id: 3, name: "result_per_page", type: "int32"})
+    public resultPerPage: number;
+}
+
+// Use the class
+const request = new SearchRequest();
+request.query = "OpenAI";
+request.pageNumber = 1;
+request.resultPerPage = 10;
+
+// Export the class instance into a protobuf message
+async function serializeRequest() {
+    try {
+        const buffer = await request.exportProto();
+        // `buffer` is an ArrayBuffer containing the serialized message
+    } catch (error) {
+        console.error("Failed to serialize message:", error);
+    }
+}
+
+serializeRequest();
+```
+
+### Parsing
+
+```typescript
+import { ProtobufElement, ProtobufProperty, ObjectProto } from "tsprotobuf";
+
+@ProtobufElement({name: "SearchRequest"})
+class SearchRequest extends ObjectProto {
+    @ProtobufProperty({id: 1, name: "query", required: true, type: "string"})
+    public query: string;
+    @ProtobufProperty({id: 2, name: "page_number", type: "int32"})
+    public pageNumber: number;
+    @ProtobufProperty({id: 3, name: "result_per_page", type: "int32"})
+    public resultPerPage: number;
+}
+
+// Given a serialized message as an ArrayBuffer
+const buffer: ArrayBuffer;
+
+// Import the protobuf message into a class instance
+async function parseRequest() {
+    try {
+        const request = await SearchRequest.importProto(buffer);
+        // `request` is a `SearchRequest` object
+        // Now you can access properties
+        console.log(request.query);
+        console.log(request.pageNumber);
+        console.log(request.resultPerPage);
+    } catch (error) {
+        console.error("Failed to parse message:", error);
+    }
+}
+
+parseRequest();
+```
+
+Please note that this example assumes that the `SearchRequest` message is simple. Parsing and serialization of nested messages or repeated fields might need additional logic or custom converters.
 
 ## Decorators
 
-To get more info about using decorators in TypeScript you can take information [here](https://www.typescriptlang.org/docs/handbook/decorators.html)
+For more information on how to use decorators in TypeScript, you can check the official TypeScript [documentation on decorators](https://www.typescriptlang.org/docs/handbook/decorators.html).
 
 ### ProtobufElement
 
-Decorator for `class`
+A decorator for `class`.
 
-| Name | Type       | Description                                                                                  |
-|------|------------|----------------------------------------------------------------------------------------------|
-| name | string     | Name of scheme in Protobuf model. Optional. If name is not presents. it uses name of `class` |
+| Parameter | Type       | Description                                                                                  |
+|-----------|------------|----------------------------------------------------------------------------------------------|
+| name      | string     | Name of the scheme in the Protobuf model. Optional. If name is not specified, the name of the `class` is used. |
 
 #### Example
 
@@ -64,208 +138,180 @@ class PersonProto {
 
 ### ProtobufProperty
 
-Decorator for class properties
+A decorator for class properties.
 
-| Name         | Type       | Description                                                                                  |
-|--------------|------------|----------------------------------------------------------------------------------------------|
-| name         | string     | Name of property in Protobuf schema                                                          |
-| id           | number     | Index of property in Protobuf message                                                        |
-| required     | boolean    | Determines if property is required                                                           |
-| repeated     | boolean    | Determines if property is repeated                                                           |
-| type         | string     | Protobuf simple type. `bytes`, `uint32`, `bool`, etc. Default value is `bytes`               |
-| converter    | IConverter | Converter for difficult data                                                                 |
-| defaultValue | any        | Default value for property                                                                   |
-| parser       | typeof ObjectProto | Parser class for child Protobuf messages                                             |
+| Parameter    | Type       | Description                                                                                |
+|--------------|------------|--------------------------------------------------------------------------------------------|
+| name         | string     | Name of the property in the Protobuf schema                                               |
+| id           | number     | Index of the property in the Protobuf message                                             |
+| required     | boolean    | Indicates whether the property is required                                                |
+| repeated     | boolean    | Indicates whether the property is repeated                                                |
+| type         | string     | Simple Protobuf type, e.g., `bytes`, `uint32`, `bool`, etc. The default value is `bytes`  |
+| converter    | IConverter | Converter for complex data types                                                           |
+| defaultValue | any        | Default value for the property                                                             |
+| parser       | typeof ObjectProto | Parser class for nested Protobuf messages                                        |
 
-#### Example 1
+#### Examples
 
-Simple Protobuf message
+The following examples demonstrate the usage of `ProtobufElement` and `ProtobufProperty` decorators.
 
-Protobuf scheme:
-```
-message SearchRequest {
-  required string query = 1;
-  optional int32 page_number = 2;
-  optional int32 result_per_page = 3;
-}
-```
+1. Basic Protobuf message:
 
-TypeScript:
-```typescript
-@ProtobufElement("SearchRequest")
-class SearchRequestProto extends ObjectProto {
+    Protobuf schema:
 
-    @ProtobufProperty({ name: "query", id: 1, type: "string", required: true })
-    public query: string;
+    ```protobuf
+    message SearchRequest {
+      required string query = 1;
+      optional int32 page_number = 2;
+      optional int32 result_per_page = 3;
+    }
+    ```
 
-    @ProtobufProperty({ name: "page_number", id: 2, type: "uint32" })
-    public pageNumber: number;
+    TypeScript:
 
-    @ProtobufProperty({ name: "result_per_page", id: 3, type: "uint32" })
-    public resultPerPage: number;
+    ```typescript
+    @ProtobufElement("SearchRequest")
+    class SearchRequestProto extends ObjectProto {
 
-}
-```
+        @ProtobufProperty({ name: "query", id: 1, type: "string", required: true })
+        public query: string;
 
-#### Example 2
+        @ProtobufProperty({ name: "page_number", id: 2, type: "uint32" })
+        public pageNumber: number;
 
-Using converters. Converts Uint8Array (`bytes`) to `ArrayBuffer`
+        @ProtobufProperty({ name: "result_per_page", id: 3, type: "uint32" })
+        public resultPerPage: number;
 
-Protobuf scheme:
-```
-message SecureRequest {
-  optional int32 version  = 1;
-  optional bytes key = 2;
-}
-```
+    }
+    ```
 
-TypeScript:
-```typescript
-@ProtobufElement("SecureRequest")
-class SecureRequestProto extends ObjectProto {
+2. Using converters: Converts `Uint8Array` (`bytes`) to `ArrayBuffer`.
 
-    @ProtobufProperty({ name: "version", id: 1, type: "uint32" })
-    public version: number;
+    Protobuf schema:
 
-    @ProtobufProperty({ name: "key", id: 2, type: "bytes", converter: ArrayBufferConverter })
-    public key: ArrayBuffer;
+    ```protobuf
+    message SecureRequest {
+      optional int32 version  = 1;
+      optional bytes key = 2;
+    }
+    ```
 
-}
-```
+    TypeScript:
 
-#### Example 3
+    ```typescript
+    @ProtobufElement("SecureRequest")
+    class SecureRequestProto extends ObjectProto {
 
-Nested types
+        @ProtobufProperty({ name: "version", id: 1, type: "uint32" })
+        public version: number;
 
-Protobuf scheme:
-```
-message SearchResponse {
-  message Result {
-    required string url = 1;
-    optional string title = 2;
-  }
-  optional Result result = 1;
-}
-```
+        @ProtobufProperty({ name: "key", id: 2, type: "bytes", converter: ArrayBufferConverter })
+        public key: ArrayBuffer;
 
-TypeScript
-```typescript
-@ProtobufElement("Result")
-class ResultProto extends ObjectProto {
+    }
+    ```
 
-    @ProtobufProperty({ name: "url", id: 1, type: "string", required: true })
-    public url: string;
+3. Nested types.
 
-    @ProtobufProperty({ name: "title", id: 2, type: "string" })
-    public title: string;
+    Protobuf schema:
 
-}
+    ```protobuf
+    message SearchResponse {
+      message Result {
+        required string url = 1;
+        optional string title = 2;
+      }
+      optional Result result = 1;
+    }
+    ```
 
-@ProtobufElement("SearchResponse")
-class SearchResponseProto extends ObjectProto {
+    TypeScript:
 
-    @ProtobufProperty({ name: "result", id: 1, type: "bytes", parser: ResultProto })
-    public result: ResultProto;
+    ```typescript
+    @ProtobufElement("Result")
+    class ResultProto extends ObjectProto {
 
-}
-```
+        @ProtobufProperty({ name: "url", id: 1, type: "string", required: true })
+        public url: string;
 
-#### Example 4
+        @ProtobufProperty({ name: "title", id: 2, type: "string" })
+        public title: string;
 
-Extending
+    }
 
-```typescript
-@ProtobufElement("BaseMessage")
-class BaseProto extends ObjectProto {
+    @ProtobufElement("SearchResponse")
+    class SearchResponseProto extends ObjectProto {
 
-    @ProtobufProperty({ name: "version", id: 1, type: "uint32", defaultValue: 1 })
-    public version: number;
+        @ProtobufProperty({ name: "result", id: 1, type: "bytes", parser: ResultProto })
+        public result: ResultProto;
 
-}
+    }
+    ```
 
-@ProtobufElement("RequestMessage")
-class RequestMessageProto extends BaseProto {
+4. Extending classes.
 
-    @ProtobufProperty({ name: "text", id: 2, type: "string" })
-    public text: string;
+    ```typescript
+    @ProtobufElement("BaseMessage")
+    class BaseProto extends ObjectProto {
 
-}
-```
+        @ProtobufProperty({ name: "version", id: 1, type: "uint32", defaultValue: 1 })
+        public version: number;
 
-#### Example 5
+    }
 
-Repeating
+    @ProtobufElement("RequestMessage")
+    class RequestMessageProto extends BaseProto {
 
-Protobuf scheme:
-```
-message CryptoKey {
-  required string algorithm = 1;
-  required string type = 2;
-  required bool extractable = 3;
-  repeated string usages = 4;
-}
+        @ProtobufProperty({ name: "text", id: 2, type: "string" })
+        public text: string;
 
-message CryptoKeys {
-    repeated CryptoKey keys = 1;
-}
-```
+    }
+    ```
 
-TypeScript
-```typescript
-@ProtobufElement("CryptoKey")
-class CryptoKeysProto extends ObjectProto {
+5. Repeating fields.
 
-    static INDEX = 0;
+    Protobuf schema:
 
-    @ProtobufProperty({ id: CryptoKeyProto.INDEX++, type: "string", required: true })
-    public algorithm: string;
-    
-    @ProtobufProperty({ id: CryptoKeyProto.INDEX++, type: "string", required: true })
-    public type: string;
+    ```protobuf
+    message CryptoKey {
+      required string algorithm = 1;
+      required string type = 2;
+      required bool extractable = 3;
+      repeated string usages = 4;
+    }
 
-    @ProtobufProperty({ id: CryptoKeyProto.INDEX++, type: "bool", required: true })
-    public extractable: boolean;
-    
-    @ProtobufProperty({ id: CryptoKeyProto.INDEX++, type: "string", repeated: true })
-    public usages: string[];
+    message CryptoKeys {
+        repeated CryptoKey keys = 1;
+    }
+    ```
 
-}
+    TypeScript:
 
-@ProtobufElement("CryptKeys")
-class CryptoKeysProto extends ObjectProto {
+    ```typescript
+    @ProtobufElement("CryptoKey")
+    class CryptoKeysProto extends ObjectProto {
 
-    static INDEX = 0;
+        static INDEX = 0;
 
-    @ProtobufProperty({ id: CryptoKeysProto.INDEX++, repeated: true, parser: CryptoKeyProto })
-    public items: CryptoKeyProto[];
+        @ProtobufProperty({ id: CryptoKeyProto.INDEX++, type: "string", required: true })
+        public algorithm: string;
 
-}
+        @ProtobufProperty({ id: CryptoKeyProto.INDEX++, type: "string", required: true })
+        public type: string;
 
-// Using
+        @ProtobufProperty({ id: CryptoKeyProto.INDEX++, type: "bool", required: true })
+        public extractable: boolean;
 
-const keys = new CryptoKeysProto();
+        @ProtobufProperty({ id: CryptoKeyProto.INDEX++, type: "string", repeated: true
 
-const key1 = new CryptoKeysProto();
-key1.algorithm = "RSA";
-key1.type = "public";
-key1.extractable = false;
-key1.usages = ["verify"];
+## License
 
-const key2 = new CryptoKeysProto();
-key2.algorithm = "ECDH";
-key2.type = "private";
-key2.extractable = false;
-key2.usages = ["deriveKey", "deriveBits"];
+MIT
 
-keys.items = [key1, key2];
+## Support
 
-keys.exportProto()
-    .then((raw) => {
-        console.log(raw);
-    })
-```
+Please file an issue on the GitHub page for this project if you experience any problems or have suggestions for improvements.
 
-## Related
+## Contributions
 
-- [TypeScript decorators](https://www.typescriptlang.org/docs/handbook/decorators.html)
-- [Protocol buffers](https://developers.google.com/protocol-buffers/docs/proto)
+We welcome all contributions. Please submit a pull request on the GitHub page for this project.
