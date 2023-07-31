@@ -16,7 +16,7 @@
     "lint:fix": "tslint --fix -p .",
     "prepub": "npm run lint && npm run test && npm run build",
     "postpub": "git push && git push --tags origin master",
-    "pub": "npm version patch && npm publish --access=public && git push",
+    "pub": "npm version patch && git push",
     "prepub:next": "npm run lint && npm run build",
     "pub:next": "npm version prerelease --preid=next && npm publish --tag next",
     "postpub:next": "git push",
