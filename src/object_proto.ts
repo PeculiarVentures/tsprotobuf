@@ -55,38 +55,46 @@ export class ObjectProto implements IProtobufSerializable {
       scheme = thisStatic.protobuf.decode(new Uint8Array(raw));
     } catch (e) {
       const err = e instanceof Error ? e : new Error("Unknown error");
-      throw new Error(`Error: Cannot decode message for ${thisStatic.localName}.\n$ProtobufError: ${err.message}`);
+      throw new Error(`Cannot decode message for ${thisStatic.localName}.\n$ProtobufError: ${err.message}`);
     }
     for (const key in thisStatic.items) {
       const item = thisStatic.items[key];
-      if (!item.required && !scheme.hasOwnProperty(item.name)) {
-        // Skip the property if field is optional and doesn't present in the scheme
-        continue;
+
+      let schemeValues = scheme[item.name];
+      if (ArrayBuffer.isView(schemeValues)) {
+        // Convert Buffer to Uint8Array
+        schemeValues = new Uint8Array(schemeValues as Uint8Array);
       }
-
-      const schemeValue = scheme[item.name];
-
-      if (item.repeated) {
+      // console.log(`Import:${thisStatic.localName}:${item.name}`);
+      if (!Array.isArray(schemeValues)) {
+        if (item.repeated) {
+          // INFO: empty protobuf array returns undefined
+          that[key] = schemeValues = [];
+        } else {
+          // Convert single element to array
+          schemeValues = [schemeValues];
+        }
+      }
+      if (item.repeated && !that[key]) {
         // initialize empty array for repeated scheme
         that[key] = [];
-
-        if (!Array.isArray(schemeValue)) {
-          throw new Error(`Cannot decode message for '${thisStatic.localName}'. Schema field '${item.name}' must be array`);
+      }
+      for (const schemeValue of schemeValues) {
+        if (item.repeated) {
+          that[key].push(await this.importItem(item, schemeValue));
+        } else {
+          that[key] = await this.importItem(item, schemeValue);
         }
-
-        for (const value of schemeValue) {
-          that[key].push(await this.importItem(item, value));
-        }
-      } else {
-        that[key] = await this.importItem(item, schemeValue);
       }
     }
     this.raw = raw;
   }
 
   public async exportProto(): Promise<ArrayBuffer> {
-    if (!this.hasChanged() && this.raw) {
-      return this.raw;
+    if (!this.hasChanged()) {
+      // NOTE: If check that raw is not `null` or `undefined`, it changes the behavior
+      //       of the function and throws an error in dependent modules.
+      return this.raw!;
     }
 
     const thisStatic = this.constructor as IProtobufScheme;
@@ -95,16 +103,22 @@ export class ObjectProto implements IProtobufSerializable {
 
     for (const key in thisStatic.items) {
       const item = thisStatic.items[key];
-      const value = that[key];
+      let values = that[key];
 
-      if (item.repeated) {
-        const list: any[] = protobuf[item.name] = [];
-        for (const v of value) {
-          const protobufValue = await this.exportItem(item, v);
-          list.push(protobufValue);
+      if (!Array.isArray(values)) {
+        values = values === void 0 ? [] : [values];
+      }
+      for (const value of values) {
+        const protobufValue = await this.exportItem(item, value);
+        if (item.repeated) {
+          if (!protobuf[item.name]) {
+            protobuf[item.name] = [];
+          }
+          protobuf[item.name].push(protobufValue);
         }
-      } else {
-        protobuf[item.name] = await this.exportItem(item, value);
+        else {
+          protobuf[item.name] = protobufValue;
+        }
       }
     }
 
@@ -117,28 +131,25 @@ export class ObjectProto implements IProtobufSerializable {
     const thisStatic = this.constructor as IProtobufScheme;
     let result: any;
     if (template.parser) {
-      // Parser
-      if (template.required && !value) {
+      const obj = value as ObjectProto;
+      const raw = await obj.exportProto();
+      if (template.required && !raw) {
         throw new Error(`Parameter '${template.name}' is required in '${thisStatic.localName}' protobuf message.`);
       }
-      if (value) {
-        if (!(value instanceof template.parser)) {
-          throw new Error(`Parameter '${template.name}' in '${thisStatic.localName}' is incorrect type. Must be '${template.parser.name}'.`);
-        }
-        const raw = await value.exportProto();
+      if (raw) {
         result = new Uint8Array(raw);
       }
-    } else {
-      if (template.required && value === void 0) {
-        throw new Error(`Error: Parameter '${template.name}' is required in '${thisStatic.localName}' protobuf message.`);
+    }
+    else {
+      if (template.required && value === undefined) {
+        throw new Error(`Parameter '${template.name}' is required in '${thisStatic.localName}' protobuf message.`);
       }
       if (template.converter) {
-        // Converter
         if (value !== undefined) {
           result = await template.converter.set(value);
         }
-      } else {
-        // Simple value
+      }
+      else {
         if (value instanceof ArrayBuffer) {
           value = new Uint8Array(value);
         }
@@ -158,14 +169,14 @@ export class ObjectProto implements IProtobufSerializable {
       if (value && value.byteLength) {
         result = await parser.importProto(new Uint8Array(value).buffer);
       } else if (template.required) {
-        throw new Error(`Error: Parameter '${template.name}' is required in '${thisStatic.localName}' protobuf message.`);
+        throw new Error(`Parameter '${template.name}' is required in '${thisStatic.localName}' protobuf message.`);
       }
     } else if (template.converter) {
       // Converter
       if (value && value.byteLength) {
         result = await template.converter.get(value);
       } else if (template.required) {
-        throw new Error(`Error: Parameter '${template.name}' is required in '${thisStatic.localName}' protobuf message.`);
+        throw new Error(`Parameter '${template.name}' is required in '${thisStatic.localName}' protobuf message.`);
       }
     } else {
       // Simple value

@@ -34,8 +34,6 @@ export function ProtobufElement(params: IProtobufElement): ClassDecorator {
         rule = "repeated";
       } else if (item.required) {
         rule = "required";
-      } else {
-        rule = "optional";
       }
       scheme.add(new Field(item.name!, item.id, item.type, rule));
     }
@@ -56,10 +54,12 @@ function defineProperty(target: any, key: string, params: IProtobufSchemeItem<an
     },
     // tslint:disable-next-line:only-arrow-functions object-literal-shorthand
     get: function (this: any): any {
-      if (this[propertyKey] === undefined) {
-        if ("defaultValue" in params) {
-          this[propertyKey] = params.defaultValue;
+      if (this[propertyKey] === void 0) {
+        let defaultValue = params.defaultValue;
+        if (params.parser && !params.repeated) {
+          defaultValue = new params.parser();
         }
+        this[propertyKey] = defaultValue;
       }
 
       return this[propertyKey];
@@ -75,31 +75,24 @@ function defineProperty(target: any, key: string, params: IProtobufSchemeItem<an
 
 export function ProtobufProperty<T>(params: ProtobufPropertyParams<T>): PropertyDecorator {
   return (target: object, propertyKey: string | symbol) => {
-    const t: IProtobufScheme = target.constructor as any;
+    const t = target.constructor as IProtobufScheme;
     const key = propertyKey as string;
-
-    t.items ??= {};
+    t.items = t.items || {};
     if (t.target !== t) {
       t.items = assign({}, t.items);
       t.target = t;
     }
-
-    const item: IProtobufSchemeItem<any> = t.items![key] = {
+    t.items![key] = {
       id: params.id,
       type: params.type || "bytes",
       defaultValue: params.defaultValue,
-      name: params.name || key,
+      converter: params.converter || null as any,
+      parser: params.parser || null as any,
+      name: params.name || key as any,
       required: params.required || false,
       repeated: params.repeated || false,
     };
-    if (params.converter) {
-      item.converter = params.converter;
-    }
-    if (params.parser) {
-      item.parser = params.parser;
-    }
-
-    defineProperty(target, key, item);
+    defineProperty(target, key, t.items![key]);
   };
 
 }
