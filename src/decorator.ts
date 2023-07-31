@@ -5,16 +5,45 @@ import type { ObjectProto } from "./object_proto";
 import { IProtobufElement, IProtobufScheme, IProtobufSchemeItem, ProtobufBasicTypes } from "./type";
 
 export interface ProtobufPropertyParams<T = unknown> {
+  /**
+   * Property name in protobuf message. If not specified, property name will be used.
+   */
   name?: string;
+  /**
+   * Property id in protobuf message.
+   */
   id: number;
+  /**
+   * Defines if property is required.
+   */
   required?: boolean;
+  /**
+   * Defines if property is repeated.
+   */
   repeated?: boolean;
+  /**
+   * Defines property type.
+   */
   type?: ProtobufBasicTypes;
+  /**
+   * Defines property converter. If not specified, default converter will be used.
+   */
   converter?: IConverter<T>;
+  /**
+   * Defines default value for property.
+   */
   defaultValue?: T;
+  /**
+   * Defines property parser.
+   */
   parser?: typeof ObjectProto;
 }
 
+/**
+ * Decorator for protobuf class.
+ * @param params - Decorator parameters.
+ * @returns Class decorator.
+ */
 export function ProtobufElement(params: IProtobufElement): ClassDecorator {
   // tslint:disable-next-line: ban-types
   return <TFunction extends Function>(target: TFunction) => {
@@ -73,6 +102,11 @@ function defineProperty(target: any, key: string, params: IProtobufSchemeItem<an
   Object.defineProperty(target, key, opt);
 }
 
+/**
+ * Decorator for protobuf property
+ * @param params - Property parameters.
+ * @returns Property decorator.
+ */
 export function ProtobufProperty<T>(params: ProtobufPropertyParams<T>): PropertyDecorator {
   return (target: object, propertyKey: string | symbol) => {
     const t = target.constructor as IProtobufScheme;

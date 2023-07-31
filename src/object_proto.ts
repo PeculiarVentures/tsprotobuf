@@ -1,7 +1,16 @@
 import { IProtobufScheme, IProtobufSchemeItem, IProtobufSerializable } from "./type";
 
+/**
+ * Base class for protobuf objects.
+ */
 export class ObjectProto implements IProtobufSerializable {
 
+  /**
+   * Creates new instance of the class from ArrayBuffer or ObjectProto.
+   * @param this - Class of the object to create.
+   * @param data - Data to import.
+   * @returns New instance of the class.
+   */
   public static async importProto<T extends ObjectProto>(this: new () => T, data: ArrayBuffer | ObjectProto): Promise<T> {
     const res = new this();
     await res.importProto(data);
@@ -9,12 +18,23 @@ export class ObjectProto implements IProtobufSerializable {
     return res;
   }
 
+  /**
+   * Raw data of the object. Represents protobuf message.
+   */
   protected raw?: ArrayBuffer | null;
 
+  /**
+   * Returns `true` if object is empty. Otherwise `false`.
+   * @returns `true` if object is empty, otherwise `false`.
+   */
   public isEmpty(): boolean {
     return this.raw === undefined;
   }
 
+  /**
+   * Returns `true` if object has been changed. Otherwise `false`.
+   * @returns `true` if object has been changed, otherwise `false`.
+   */
   public hasChanged(): boolean {
     if (this.raw === null) {
       return true;
@@ -127,6 +147,12 @@ export class ObjectProto implements IProtobufSerializable {
     return this.raw;
   }
 
+  /**
+   * Exports item to protobuf.
+   * @param template - Template of the item.
+   * @param value - Value of the item.
+   * @returns Exported item.
+   */
   protected async exportItem(template: IProtobufSchemeItem<any>, value: unknown): Promise<any> {
     const thisStatic = this.constructor as IProtobufScheme;
     let result: any;
@@ -160,6 +186,12 @@ export class ObjectProto implements IProtobufSerializable {
     return result;
   }
 
+  /**
+   * Imports item from protobuf.
+   * @param template - Template of the item.
+   * @param value - Value of the item.
+   * @returns Imported item.
+   */
   protected async importItem(template: IProtobufSchemeItem<any>, value: any): Promise<any> {
     const thisStatic = this.constructor as IProtobufScheme;
     let result: any;
